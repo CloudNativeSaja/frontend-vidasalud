@@ -1,40 +1,172 @@
-<section>
+<section class="panel-dashboard">
 
-    <h2>Dashboard VidaSalud</h2>
+    <div class="encabezado-dashboard">
 
-    <p>
-        Acceso correcto. Esta ruta está protegida con Microsoft Entra ID y MsalGuard.
-    </p>
+        <span class="etiqueta-seccion">
+        Dashboard
+        </span>
 
-    <h3>Perfil obtenido desde Microsoft Graph</h3>
-
-    @if (profile()) {
-
-        <p>
-        <strong>Nombre:</strong>
-        {{ profile()!.displayName }}
-        </p>
+        <h2>
+        Resumen general
+        </h2>
 
         <p>
-        <strong>Usuario:</strong>
-        {{ profile()!.userPrincipalName }}
+        Accede rápidamente a las principales áreas de gestión de VidaSalud.
         </p>
+
+    </div>
+
+
+    <div class="rejilla-modulos">
+
+        <article class="tarjeta-modulo">
+
+        <div class="icono-modulo">
+            +
+        </div>
+
+        <div>
+            <h3>Citas</h3>
+
+            <p>
+            Gestión y seguimiento de atenciones agendadas.
+            </p>
+        </div>
+
+        </article>
+
+
+        <article class="tarjeta-modulo">
+
+        <div class="icono-modulo">
+            +
+        </div>
+
+        <div>
+            <h3>Catálogo</h3>
+
+            <p>
+            Servicios de salud, boxes y disponibilidad.
+            </p>
+        </div>
+
+        </article>
+
+
+        <article class="tarjeta-modulo">
+
+        <div class="icono-modulo">
+            +
+        </div>
+
+        <div>
+            <h3>Reportes</h3>
+
+            <p>
+            Consulta de información y resultados de la plataforma.
+            </p>
+        </div>
+
+        </article>
+
+
+        <article class="tarjeta-modulo">
+
+        <div class="icono-modulo">
+            +
+        </div>
+
+        <div>
+            <h3>Auditoría</h3>
+
+            <p>
+            Revisión de actividad y acciones registradas en el sistema.
+            </p>
+        </div>
+
+        </article>
+
+    </div>
+
+
+    <div class="rejilla-informacion">
+
+        <article class="tarjeta-informacion">
+
+        <span class="etiqueta-seccion">
+            Seguridad
+        </span>
+
+        <h3>
+            Sesión protegida
+        </h3>
 
         <p>
-        <strong>Correo:</strong>
-        {{ profile()!.mail || profile()!.userPrincipalName }}
+            La sesión actual está autenticada mediante Microsoft Entra ID
+            y la ruta está protegida con MsalGuard.
         </p>
 
-    } @else if (errorMessage()) {
+        <div class="estado-seguridad">
+            <span class="indicador-estado"></span>
+            Autenticación activa
+        </div>
 
-        <p>
-        {{ errorMessage() }}
-        </p>
+        </article>
 
-    } @else {
 
-        <p>Cargando información del usuario...</p>
+        <article class="tarjeta-informacion">
 
-    }
+        <span class="etiqueta-seccion">
+            Usuario
+        </span>
+
+        <h3>
+            Perfil de Microsoft
+        </h3>
+
+        @if (profile()) {
+
+            <div class="datos-perfil">
+
+            <div>
+                <span>Nombre</span>
+                <strong>
+                {{ profile()!.displayName }}
+                </strong>
+            </div>
+
+            <div>
+                <span>Usuario</span>
+                <strong>
+                {{ profile()!.userPrincipalName }}
+                </strong>
+            </div>
+
+            <div>
+                <span>Correo</span>
+                <strong>
+                {{ profile()!.mail || profile()!.userPrincipalName }}
+                </strong>
+            </div>
+
+            </div>
+
+        } @else if (errorMessage()) {
+
+            <p class="mensaje-error">
+            {{ errorMessage() }}
+            </p>
+
+        } @else {
+
+            <p class="mensaje-carga">
+            Cargando información del usuario...
+            </p>
+
+        }
+
+        </article>
+
+    </div>
 
 </section>

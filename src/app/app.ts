@@ -1,5 +1,6 @@
 import { Component, inject, OnInit } from '@angular/core';
 import {
+  Router,
   RouterLink,
   RouterLinkActive,
   RouterOutlet
@@ -28,6 +29,11 @@ export class App implements OnInit {
 
   private msalService = inject(MsalService);
   private msalBroadcastService = inject(MsalBroadcastService);
+  private router = inject(Router);
+
+  estaEnInicio(): boolean {
+    return this.router.url === '/';
+  }
 
   isLoggedIn = false;
   userName = '';
