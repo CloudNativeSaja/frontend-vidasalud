@@ -1,0 +1,308 @@
+.estructura-app {
+    min-height: 100vh;
+}
+
+.barra-superior {
+    min-height: 76px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 24px;
+
+    padding: 14px 6%;
+
+    background: var(--color-superficie);
+
+    border-bottom:
+        1px solid var(--color-borde);
+}
+
+.marca {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    color: var(--color-texto);
+    text-decoration: none;
+}
+
+.icono-marca,
+.icono-medico {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    color: white;
+    background: var(--color-principal);
+
+    font-weight: 700;
+}
+
+.icono-marca {
+    width: 42px;
+    height: 42px;
+
+    border-radius: 12px;
+
+    font-size: 26px;
+}
+
+.marca h1 {
+    margin: 0;
+
+    font-size: 21px;
+    font-weight: 650;
+}
+
+.marca span {
+    color: var(--color-texto-secundario);
+
+    font-size: 12px;
+}
+
+.acciones-usuario {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.info-usuario {
+    display: flex;
+    flex-direction: column;
+
+    text-align: right;
+}
+
+.info-usuario span {
+    color: var(--color-texto-secundario);
+
+    font-size: 11px;
+}
+
+.info-usuario strong {
+    font-size: 13px;
+}
+
+.boton-cerrar-sesion {
+    padding: 9px 15px;
+
+    border:
+        1px solid var(--color-borde);
+
+    border-radius: 9px;
+
+    background: var(--color-superficie);
+    color: var(--color-texto);
+
+    cursor: pointer;
+
+    transition: 0.2s ease;
+}
+
+.boton-cerrar-sesion:hover {
+    border-color: var(--color-peligro);
+    color: var(--color-peligro);
+}
+
+.contenido-principal {
+    width: min(1180px, 90%);
+
+    margin: 0 auto;
+
+    padding: 48px 0;
+}
+
+.seccion-login {
+    min-height: calc(100vh - 175px);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.tarjeta-login {
+    width: min(460px, 100%);
+
+    padding: 48px 42px;
+
+    text-align: center;
+
+    background: var(--color-superficie);
+
+    border:
+        1px solid var(--color-borde);
+
+    border-radius: 22px;
+
+    box-shadow: var(--sombra-suave);
+}
+
+.icono-medico {
+    width: 62px;
+    height: 62px;
+
+    margin: 0 auto 22px;
+
+    border-radius: 18px;
+
+    font-size: 38px;
+
+    box-shadow:
+        0 10px 24px rgba(47, 158, 147, 0.2);
+}
+
+.etiqueta-superior {
+    display: block;
+
+    margin-bottom: 9px;
+
+    color: var(--color-principal);
+
+    font-size: 12px;
+    font-weight: 700;
+
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+}
+
+.tarjeta-login h2,
+.seccion-bienvenida h2 {
+    margin: 0;
+
+    color: var(--color-texto);
+
+    font-weight: 650;
+}
+
+.tarjeta-login h2 {
+    font-size: 30px;
+}
+
+.tarjeta-login p {
+    max-width: 350px;
+
+    margin:
+        14px auto 28px;
+
+    color: var(--color-texto-secundario);
+
+    line-height: 1.6;
+}
+
+.boton-principal,
+.enlace-principal {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    border: none;
+    border-radius: 11px;
+
+    background: var(--color-principal);
+    color: white;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    text-decoration: none;
+
+    transition:
+        background 0.2s ease,
+        transform 0.2s ease;
+}
+
+.boton-principal {
+    width: 100%;
+
+    padding: 13px 18px;
+}
+
+.enlace-principal {
+    padding: 12px 20px;
+}
+
+.boton-principal:hover,
+.enlace-principal:hover {
+    background: var(--color-principal-oscuro);
+
+    transform: translateY(-1px);
+}
+
+.mensaje-seguridad {
+    display: block;
+
+    margin-top: 18px;
+
+    color: var(--color-texto-secundario);
+
+    font-size: 11px;
+}
+
+.seccion-bienvenida {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 30px;
+
+    margin-bottom: 30px;
+
+    padding: 26px 30px;
+
+    background:
+        linear-gradient(
+        135deg,
+        var(--color-principal-claro),
+        var(--color-secundario-claro)
+        );
+
+    border:
+        1px solid var(--color-borde);
+
+    border-radius: var(--radio-borde);
+}
+
+.seccion-bienvenida h2 {
+    margin-bottom: 8px;
+
+    font-size: 25px;
+}
+
+.seccion-bienvenida p {
+    margin: 0;
+
+    color: var(--color-texto-secundario);
+}
+
+@media (max-width: 700px) {
+
+.barra-superior {
+padding:
+    12px 20px;
+}
+
+.info-usuario {
+display: none;
+}
+
+.contenido-principal {
+    width: 92%;
+
+    padding:
+    30px 0;
+}
+
+.tarjeta-login {
+    padding:
+    38px 25px;
+}
+
+.seccion-bienvenida {
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+}

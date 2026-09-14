@@ -1,44 +1,118 @@
-<main class="container">
+<div class="estructura-app">
 
-  <h1>VidaSalud</h1>
+  <header class="barra-superior">
 
-  <p>Plataforma de gestión de atenciones</p>
+    <a
+      class="marca"
+      routerLink="/"
+    >
+      <div class="icono-marca">
+        +
+      </div>
 
-  @if (!isLoggedIn) {
+      <div>
+        <h1>VidaSalud</h1>
+        <span>Gestión de atenciones</span>
+      </div>
+    </a>
 
-    <section>
-      <h2>Bienvenido</h2>
+    @if (isLoggedIn) {
 
-      <p>
-        Inicia sesión con Microsoft para continuar.
-      </p>
+      <div class="acciones-usuario">
 
-      <button (click)="login()">
-        Iniciar sesión con Microsoft
-      </button>
-    </section>
+        <div class="info-usuario">
+          <span>Sesión iniciada</span>
+          <strong>{{ userName }}</strong>
+        </div>
 
-  } @else {
+        <button
+          class="boton-cerrar-sesion"
+          (click)="logout()"
+        >
+          Cerrar sesión
+        </button>
 
-    <section>
-      <h2>Sesión iniciada</h2>
+      </div>
 
-      <p>
-        Bienvenido, <strong>{{ userName }}</strong>
-      </p>
+    }
 
-      <p>
-        <a routerLink="/dashboard">
+  </header>
+
+
+  <main class="contenido-principal">
+
+    @if (!isLoggedIn) {
+
+      <section class="seccion-login">
+
+        <div class="tarjeta-login">
+
+          <div class="icono-medico">
+            +
+          </div>
+
+          <span class="etiqueta-superior">
+            Plataforma VidaSalud
+          </span>
+
+          <h2>
+            Bienvenido
+          </h2>
+
+          <p>
+            Accede de forma segura para gestionar
+            las atenciones de VidaSalud.
+          </p>
+
+          <button
+            class="boton-principal"
+            (click)="login()"
+          >
+            Iniciar sesión con Microsoft
+          </button>
+
+          <span class="mensaje-seguridad">
+            Acceso protegido con Microsoft Entra ID
+          </span>
+
+        </div>
+
+      </section>
+
+    } @else {
+
+      <section class="seccion-bienvenida">
+
+        <div>
+
+          <span class="etiqueta-superior">
+            Panel principal
+          </span>
+
+          <h2>
+            Hola, {{ userName }}
+          </h2>
+
+          <p>
+            Bienvenido a la plataforma de gestión
+            de atenciones VidaSalud.
+          </p>
+
+        </div>
+
+        <a
+          class="enlace-principal"
+          routerLink="/dashboard"
+        >
           Ir al Dashboard
         </a>
-      </p>
 
-      <button (click)="logout()">
-        Cerrar sesión
-      </button>
-    </section>
+      </section>
 
-  }
+    }
 
-</main>
-<router-outlet></router-outlet>
+    <router-outlet></router-outlet>
+
+  </main>
+
+</div>
