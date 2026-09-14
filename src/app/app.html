@@ -38,6 +38,48 @@
 
   </header>
 
+      @if (isLoggedIn) {
+
+      <nav class="navegacion-principal">
+
+        <a
+          routerLink="/dashboard"
+          routerLinkActive="activo"
+        >
+          Dashboard
+        </a>
+
+        <a
+          routerLink="/citas"
+          routerLinkActive="activo"
+        >
+          Citas
+        </a>
+
+        <a
+          routerLink="/catalogo"
+          routerLinkActive="activo"
+        >
+          Catálogo
+        </a>
+
+        <a
+          routerLink="/reportes"
+          routerLinkActive="activo"
+        >
+          Reportes
+        </a>
+
+        <a
+          routerLink="/auditoria"
+          routerLinkActive="activo"
+        >
+          Auditoría
+        </a>
+
+      </nav>
+
+    }
 
   <main class="contenido-principal">
 
