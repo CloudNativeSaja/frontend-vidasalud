@@ -1,7 +1,40 @@
 <section>
+
     <h2>Dashboard VidaSalud</h2>
 
     <p>
         Acceso correcto. Esta ruta está protegida con Microsoft Entra ID y MsalGuard.
     </p>
+
+    <h3>Perfil obtenido desde Microsoft Graph</h3>
+
+    @if (profile()) {
+
+        <p>
+        <strong>Nombre:</strong>
+        {{ profile()!.displayName }}
+        </p>
+
+        <p>
+        <strong>Usuario:</strong>
+        {{ profile()!.userPrincipalName }}
+        </p>
+
+        <p>
+        <strong>Correo:</strong>
+        {{ profile()!.mail || profile()!.userPrincipalName }}
+        </p>
+
+    } @else if (errorMessage()) {
+
+        <p>
+        {{ errorMessage() }}
+        </p>
+
+    } @else {
+
+        <p>Cargando información del usuario...</p>
+
+    }
+
 </section>
