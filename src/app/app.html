@@ -27,6 +27,12 @@
         Bienvenido, <strong>{{ userName }}</strong>
       </p>
 
+      <p>
+        <a routerLink="/dashboard">
+          Ir al Dashboard
+        </a>
+      </p>
+
       <button (click)="logout()">
         Cerrar sesión
       </button>
@@ -35,3 +41,4 @@
   }
 
 </main>
+<router-outlet></router-outlet>
