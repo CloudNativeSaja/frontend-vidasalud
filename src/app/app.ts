@@ -64,35 +64,41 @@ export class App implements OnInit {
     this.checkLoginStatus();
   }
 
-  private checkLoginStatus(): void {
+private checkLoginStatus(): void {
 
-    const accounts =
-      this.msalService.instance.getAllAccounts();
+  const accounts =
+    this.msalService.instance.getAllAccounts();
 
-    let activeAccount =
-      this.msalService.instance.getActiveAccount();
+  let activeAccount =
+    this.msalService.instance.getActiveAccount();
 
-    if (!activeAccount && accounts.length > 0) {
-      activeAccount = accounts[0];
+  if (!activeAccount && accounts.length > 0) {
+    activeAccount = accounts[0];
 
-      this.msalService.instance.setActiveAccount(
-        activeAccount
-      );
-    }
-
-    this.isLoggedIn = !!activeAccount;
-
-    this.userName =
-      activeAccount?.name ??
-      activeAccount?.username ??
-      '';
+    this.msalService.instance.setActiveAccount(
+      activeAccount
+    );
   }
 
-  login(): void {
-    this.msalService.loginRedirect();
-  }
+  this.isLoggedIn = !!activeAccount;
 
-  logout(): void {
-    this.msalService.logoutRedirect();
-  }
+  this.userName =
+    activeAccount?.name ??
+    activeAccount?.username ??
+    '';
+
+}
+
+login(): void {
+  this.msalService.loginRedirect({
+    scopes: [
+      'api://87836a5b-acbe-48cb-8154-37e25612d06b/access_as_user'
+    ]
+  });
+}
+
+logout(): void {
+  this.msalService.logoutRedirect();
+}
+
 }
