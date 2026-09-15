@@ -1,0 +1,189 @@
+.pagina-auditoria {
+    display: flex;
+    flex-direction: column;
+
+    gap: 24px;
+}
+
+.encabezado-pagina h2 {
+    margin:
+        6px 0 8px;
+
+    color: var(--color-texto);
+
+    font-size: 28px;
+    font-weight: 650;
+}
+
+.encabezado-pagina p {
+    margin: 0;
+
+    color: var(--color-texto-secundario);
+
+    line-height: 1.6;
+}
+
+.etiqueta-seccion {
+    color: var(--color-principal);
+
+    font-size: 12px;
+    font-weight: 700;
+
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+}
+
+.panel-auditoria {
+    overflow: hidden;
+
+    background: var(--color-superficie);
+
+    border:
+        1px solid var(--color-borde);
+
+    border-radius: var(--radio-borde);
+
+    box-shadow:
+        0 4px 16px rgba(36, 67, 68, 0.04);
+}
+
+.encabezado-panel {
+    padding: 24px 26px;
+
+    border-bottom:
+        1px solid var(--color-borde);
+}
+
+.encabezado-panel h3 {
+    margin:
+        0 0 6px;
+
+    color: var(--color-texto);
+
+    font-size: 18px;
+}
+
+.encabezado-panel p {
+    margin: 0;
+
+    color: var(--color-texto-secundario);
+
+    font-size: 13px;
+}
+
+.cabecera-tabla {
+    display: grid;
+
+    grid-template-columns:
+        1.2fr
+        1.4fr
+        1fr
+        2fr;
+
+    gap: 16px;
+
+    padding: 13px 26px;
+
+    background: var(--color-secundario-claro);
+
+    border-bottom:
+        1px solid var(--color-borde);
+}
+
+.cabecera-tabla span {
+    color: var(--color-texto-secundario);
+
+    font-size: 11px;
+    font-weight: 700;
+
+    text-transform: uppercase;
+}
+
+.estado-sin-datos {
+    min-height: 280px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    padding: 40px;
+
+    text-align: center;
+}
+
+.icono-estado {
+    width: 48px;
+    height: 48px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    margin-bottom: 16px;
+
+    border-radius: 13px;
+
+    background: var(--color-principal-claro);
+    color: var(--color-principal-oscuro);
+
+    font-size: 27px;
+    font-weight: 700;
+}
+
+.estado-sin-datos h3 {
+    margin:
+        0 0 8px;
+
+    color: var(--color-texto);
+
+    font-size: 18px;
+}
+
+.estado-sin-datos p {
+    max-width: 480px;
+
+    margin:
+        0 0 18px;
+
+    color: var(--color-texto-secundario);
+
+    font-size: 13px;
+
+    line-height: 1.6;
+}
+
+.estado-modulo {
+    padding:
+        7px 11px;
+
+    border-radius: 999px;
+
+    background: var(--color-secundario-claro);
+    color: var(--color-principal-oscuro);
+
+    font-size: 11px;
+    font-weight: 600;
+}
+
+@media (max-width: 700px) {
+
+    .encabezado-pagina h2 {
+        font-size: 24px;
+    }
+
+    .cabecera-tabla {
+        display: none;
+    }
+
+    .encabezado-panel {
+        padding: 20px;
+    }
+
+    .estado-sin-datos {
+        min-height: 250px;
+
+        padding: 30px 20px;
+    }
+
+}

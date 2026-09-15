@@ -34,6 +34,9 @@ import {
 
 import { routes } from './app.routes';
 
+const VIDA_SALUD_API_SCOPE =
+  'api://87836a5b-acbe-48cb-8154-37e25612d06b/access_as_user';
+
 
 export function MSALInstanceFactory(): IPublicClientApplication {
   return new PublicClientApplication({
@@ -55,7 +58,10 @@ export function MSALGuardConfigFactory(): MsalGuardConfiguration {
   return {
     interactionType: InteractionType.Redirect,
     authRequest: {
-      scopes: ['user.read']
+      scopes: [
+        'user.read',
+        VIDA_SALUD_API_SCOPE
+      ]
     }
   };
 }
