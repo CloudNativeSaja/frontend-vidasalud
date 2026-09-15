@@ -67,17 +67,30 @@ export function MSALGuardConfigFactory(): MsalGuardConfiguration {
 
 
 export function MSALInterceptorConfigFactory(): MsalInterceptorConfiguration {
+
   const protectedResourceMap = new Map<string, Array<string>>();
 
   protectedResourceMap.set(
     'https://graph.microsoft.com/v1.0/me',
-    ['user.read']
+    [
+      'user.read'
+    ]
   );
+
+
+  protectedResourceMap.set(
+    'http://localhost:8080/api/bff',
+    [
+      VIDA_SALUD_API_SCOPE
+    ]
+  );
+
 
   return {
     interactionType: InteractionType.Redirect,
     protectedResourceMap
   };
+
 }
 
 
