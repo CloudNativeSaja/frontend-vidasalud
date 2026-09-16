@@ -10,7 +10,7 @@ export class CatalogService {
 
 
   private apiUrl =
-    'http://localhost:8080/api/bff/catalog';
+  'http://54.160.192.249:8080/api/bff/catalog';
 
 
   constructor(

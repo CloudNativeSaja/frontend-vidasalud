@@ -80,15 +80,7 @@ export function MSALInterceptorConfigFactory(): MsalInterceptorConfiguration {
 
 
   protectedResourceMap.set(
-    'http://localhost:8080',
-    [
-      VIDA_SALUD_API_SCOPE
-    ]
-  );
-
-
-  protectedResourceMap.set(
-    'http://localhost:8080/api/bff/',
+    'http://54.160.192.249:8080',
     [
       VIDA_SALUD_API_SCOPE
     ]
