@@ -91,7 +91,7 @@ export class App implements OnInit {
   login(): void {
     this.msalService.loginRedirect({
       scopes: [
-        'api://87836a5b-acbe-48cb-8154-37e25612d06b/access_as_user'
+        'api://964063ab-9c14-41ca-9ecb-9b6d3891e750/access_as_user'
       ]
     });
   }
