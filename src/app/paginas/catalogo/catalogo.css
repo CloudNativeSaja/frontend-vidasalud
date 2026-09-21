@@ -1,135 +1,379 @@
 .pagina-catalogo {
-    display: flex;
-    flex-direction: column;
-
-    gap: 24px;
+  padding: 28px;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
-.encabezado-pagina h2 {
-    margin:
-        6px 0 8px;
 
-    color: var(--color-texto);
+/* =========================================
+   ENCABEZADO
+========================================= */
 
-    font-size: 28px;
-    font-weight: 650;
-}
-
-.encabezado-pagina p {
-    margin: 0;
-
-    color: var(--color-texto-secundario);
-
-    line-height: 1.6;
+.encabezado-pagina {
+  margin-bottom: 24px;
 }
 
 .etiqueta-seccion {
-    color: var(--color-principal);
-
-    font-size: 12px;
-    font-weight: 700;
-
-    letter-spacing: 0.07em;
-    text-transform: uppercase;
+  font-size: 12px;
+  font-weight: 700;
+  color: #159b91;
+  letter-spacing: 0.5px;
 }
 
-.rejilla-catalogo {
-    display: grid;
-
-    grid-template-columns:
-        repeat(3, minmax(0, 1fr));
-
-    gap: 18px;
+.encabezado-pagina h2 {
+  margin: 6px 0;
+  font-size: 28px;
+  color: #12313a;
 }
 
-.tarjeta-catalogo {
-    min-height: 230px;
-
-    display: flex;
-    flex-direction: column;
-
-    padding: 26px;
-
-    background: var(--color-superficie);
-
-    border:
-        1px solid var(--color-borde);
-
-    border-radius: var(--radio-borde);
-
-    box-shadow:
-        0 4px 16px rgba(36, 67, 68, 0.04);
+.encabezado-pagina p {
+  margin: 0;
+  color: #60777d;
+  font-size: 14px;
 }
 
-.icono-catalogo {
-    width: 44px;
-    height: 44px;
 
-    display: flex;
-    align-items: center;
-    justify-content: center;
+/* =========================================
+   MENSAJES
+========================================= */
 
-    margin-bottom: 18px;
-
-    border-radius: 12px;
-
-    background: var(--color-principal-claro);
-    color: var(--color-principal-oscuro);
-
-    font-size: 25px;
-    font-weight: 700;
+.mensaje {
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 18px;
+  font-size: 14px;
 }
 
-.tarjeta-catalogo h3 {
-    margin:
-        0 0 8px;
-
-    color: var(--color-texto);
-
-    font-size: 18px;
+.mensaje-exito {
+  background: #e5f7f3;
+  color: #14796f;
+  border: 1px solid #b9e6de;
 }
 
-.tarjeta-catalogo p {
-    margin:
-        0 0 20px;
-
-    color: var(--color-texto-secundario);
-
-    font-size: 13px;
-
-    line-height: 1.6;
+.mensaje-error {
+  background: #fff0f0;
+  color: #a33a3a;
+  border: 1px solid #f0caca;
 }
 
-.estado-modulo {
-    width: fit-content;
 
-    margin-top: auto;
+/* =========================================
+   MÓDULOS
+========================================= */
 
-    padding:
-        7px 11px;
-
-    border-radius: 999px;
-
-    background: var(--color-secundario-claro);
-    color: var(--color-principal-oscuro);
-
-    font-size: 11px;
-    font-weight: 600;
+.modulo-catalogo {
+  background: white;
+  border: 1px solid #dce8e8;
+  border-radius: 12px;
+  margin-bottom: 18px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
 }
 
-@media (max-width: 900px) {
-
-    .rejilla-catalogo {
-        grid-template-columns:
-            1fr;
-    }
-
+.modulo-header {
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
 }
+
+.modulo-header > div:first-child {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.icono-modulo {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  background: #dff5f1;
+  color: #159b91;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: 500;
+}
+
+.modulo-header h3 {
+  margin: 0 0 5px;
+  color: #18343c;
+  font-size: 18px;
+}
+
+.modulo-header p {
+  margin: 0;
+  color: #6c7d81;
+  font-size: 13px;
+}
+
+
+/* =========================================
+   BOTONES
+========================================= */
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.btn-principal {
+  border: none;
+  background: #159b91;
+  color: white;
+  padding: 9px 15px;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.btn-principal:hover {
+  background: #117f77;
+}
+
+.btn-agregar {
+  border: none;
+  background: #dff5f1;
+  color: #147e76;
+  padding: 9px 14px;
+  border-radius: 7px;
+  font-weight: 600;
+}
+
+.btn-secundario {
+  border: 1px solid #ccdcdc;
+  background: white;
+  color: #52666b;
+  padding: 9px 15px;
+  border-radius: 7px;
+}
+
+.btn-editar {
+  border: 1px solid #b9deda;
+  background: #effaf8;
+  color: #147e76;
+  padding: 7px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.btn-eliminar {
+  border: 1px solid #efcccc;
+  background: #fff6f6;
+  color: #a34444;
+  padding: 7px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+
+/* =========================================
+   CONTENIDO
+========================================= */
+
+.contenido-modulo {
+  border-top: 1px solid #e5eeee;
+  padding: 20px;
+}
+
+.barra-acciones {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  color: #465d63;
+  font-size: 13px;
+}
+
+
+/* =========================================
+   FORMULARIOS
+========================================= */
+
+.formulario {
+  background: #f7fbfa;
+  border: 1px solid #d8e9e6;
+  border-radius: 10px;
+  padding: 18px;
+  margin-bottom: 18px;
+}
+
+.formulario h4 {
+  margin: 0 0 16px;
+  color: #19373e;
+  font-size: 16px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+
+.form-grid label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: #52666b;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.form-grid input,
+.form-grid select {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #cbdcda;
+  background: white;
+  border-radius: 7px;
+  padding: 10px;
+  font-family: inherit;
+  font-size: 13px;
+  color: #263e43;
+  outline: none;
+}
+
+.form-grid input:focus,
+.form-grid select:focus {
+  border-color: #159b91;
+}
+
+.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  color: #52666b;
+  font-size: 13px;
+}
+
+.checkbox input {
+  accent-color: #159b91;
+}
+
+.acciones-form {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+
+/* =========================================
+   LISTADOS
+========================================= */
+
+.lista-items {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.item-admin {
+  border: 1px solid #e1ebeb;
+  border-radius: 9px;
+  padding: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+}
+
+.item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.item-info strong {
+  color: #17363d;
+  font-size: 14px;
+}
+
+.item-info span {
+  color: #63767b;
+  font-size: 12px;
+}
+
+.item-info small {
+  color: #73868a;
+  font-size: 11px;
+}
+
+.item-acciones {
+  display: flex;
+  gap: 7px;
+  flex-shrink: 0;
+}
+
+
+/* =========================================
+   ESTADOS
+========================================= */
+
+.estado {
+  width: fit-content;
+  background: #e5f7f3;
+  color: #14796f !important;
+  padding: 4px 8px;
+  border-radius: 20px;
+  font-size: 10px !important;
+  font-weight: 600;
+}
+
+.estado.inactivo {
+  background: #f1eeee;
+  color: #806b6b !important;
+}
+
+
+/* =========================================
+   VACÍO
+========================================= */
+
+.vacio {
+  padding: 25px;
+  text-align: center;
+  color: #819195;
+  font-size: 13px;
+  border: 1px dashed #d4e1e1;
+  border-radius: 8px;
+}
+
+
+/* =========================================
+   RESPONSIVE
+========================================= */
 
 @media (max-width: 700px) {
 
-    .encabezado-pagina h2 {
-        font-size: 24px;
-    }
+  .pagina-catalogo {
+    padding: 18px;
+  }
 
+  .modulo-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .item-admin {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .item-acciones {
+    width: 100%;
+  }
+
+  .item-acciones button {
+    flex: 1;
+  }
 }

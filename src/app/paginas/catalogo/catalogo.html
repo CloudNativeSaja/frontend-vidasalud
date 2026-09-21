@@ -1,78 +1,742 @@
 <section class="pagina-catalogo">
 
-    <header class="encabezado-pagina">
+  <!-- ========================================= -->
+  <!-- ENCABEZADO -->
+  <!-- ========================================= -->
 
-        <span class="etiqueta-seccion">
-        Catálogo clínico
-        </span>
+  <header class="encabezado-pagina">
 
-        <h2>Catálogo</h2>
+    <span class="etiqueta-seccion">
+      CATÁLOGO CLÍNICO
+    </span>
 
-        <p>
-        Administra la información base utilizada para la atención de pacientes.
-        </p>
+    <h2>Catálogo</h2>
 
-    </header>
+    <p>
+      Administra los servicios, boxes y horarios disponibles
+      para la atención de pacientes.
+    </p>
+
+  </header>
 
 
-    <div class="rejilla-catalogo">
+  <!-- ========================================= -->
+  <!-- MENSAJES -->
+  <!-- ========================================= -->
 
-        <article class="tarjeta-catalogo">
+  @if (successMessage()) {
 
-        <div class="icono-catalogo">
-            +
+    <div class="mensaje mensaje-exito">
+      {{ successMessage() }}
+    </div>
+
+  }
+
+  @if (errorMessage()) {
+
+    <div class="mensaje mensaje-error">
+      {{ errorMessage() }}
+    </div>
+
+  }
+
+
+  <!-- ========================================= -->
+  <!-- SERVICIOS -->
+  <!-- ========================================= -->
+
+  <article class="modulo-catalogo">
+
+    <div class="modulo-header">
+
+      <div>
+        <span class="icono-modulo">+</span>
+
+        <div>
+          <h3>Servicios de salud</h3>
+
+          <p>
+            Administra las prestaciones médicas disponibles.
+          </p>
         </div>
+      </div>
 
-        <h3>Servicios de salud</h3>
+      <button
+        type="button"
+        class="btn-principal"
+        (click)="mostrarServicios = !mostrarServicios">
 
-        <p>
-            Consulta y administra los servicios clínicos disponibles en VidaSalud.
-        </p>
+        {{ mostrarServicios ? 'Ocultar' : 'Ver servicios' }}
 
-        <span class="estado-modulo">
-            Pendiente de integración
-        </span>
-
-        </article>
-
-
-        <article class="tarjeta-catalogo">
-
-        <div class="icono-catalogo">
-            +
-        </div>
-
-        <h3>Boxes clínicos</h3>
-
-        <p>
-            Gestión de los espacios físicos disponibles para realizar atenciones.
-        </p>
-
-        <span class="estado-modulo">
-            Pendiente de integración
-        </span>
-
-        </article>
-
-
-        <article class="tarjeta-catalogo">
-
-        <div class="icono-catalogo">
-            +
-        </div>
-
-        <h3>Horarios disponibles</h3>
-
-        <p>
-            Consulta de bloques horarios y disponibilidad para futuras atenciones.
-        </p>
-
-        <span class="estado-modulo">
-            Pendiente de integración
-        </span>
-
-        </article>
+      </button>
 
     </div>
+
+
+    @if (mostrarServicios) {
+
+      <div class="contenido-modulo">
+
+        <div class="barra-acciones">
+
+          <strong>
+            Servicios registrados:
+            {{ services().length }}
+          </strong>
+
+          <button
+            type="button"
+            class="btn-agregar"
+            (click)="nuevoServicio()">
+
+            + Nuevo servicio
+
+          </button>
+
+        </div>
+
+
+        <!-- FORMULARIO SERVICIO -->
+
+        @if (mostrarFormularioServicio) {
+
+          <div class="formulario">
+
+            <h4>
+              {{ editandoServicio
+                ? 'Editar servicio'
+                : 'Nuevo servicio' }}
+            </h4>
+
+            <div class="form-grid">
+
+              <label>
+                Nombre
+                <input
+                  type="text"
+                  [(ngModel)]="servicioForm.name"
+                  placeholder="Ej: Medicina General">
+              </label>
+
+
+              <label>
+                Descripción
+                <input
+                  type="text"
+                  [(ngModel)]="servicioForm.description"
+                  placeholder="Descripción del servicio">
+              </label>
+
+
+              <label>
+                Precio
+                <input
+                  type="number"
+                  [(ngModel)]="servicioForm.price"
+                  min="0">
+              </label>
+
+
+              <label>
+                Duración (minutos)
+                <input
+                  type="number"
+                  [(ngModel)]="servicioForm.durationMinutes"
+                  min="1">
+              </label>
+
+            </div>
+
+
+            <label class="checkbox">
+
+              <input
+                type="checkbox"
+                [(ngModel)]="servicioForm.active">
+
+              Servicio activo
+
+            </label>
+
+
+            <div class="acciones-form">
+
+              <button
+                type="button"
+                class="btn-secundario"
+                (click)="cancelarServicio()">
+
+                Cancelar
+
+              </button>
+
+              <button
+                type="button"
+                class="btn-principal"
+                (click)="guardarServicio()">
+
+                {{ editandoServicio
+                  ? 'Guardar cambios'
+                  : 'Crear servicio' }}
+
+              </button>
+
+            </div>
+
+          </div>
+
+        }
+
+
+        <!-- LISTADO -->
+
+        <div class="lista-items">
+
+          @for (
+            service of services();
+            track service.id
+          ) {
+
+            <div class="item-admin">
+
+              <div class="item-info">
+
+                <strong>
+                  {{ service.name }}
+                </strong>
+
+                <span>
+                  {{ service.description }}
+                </span>
+
+                <small>
+                  {{ service.durationMinutes }} minutos
+                  · ${{ service.price }}
+                </small>
+
+                <span
+                  class="estado"
+                  [class.inactivo]="!service.active">
+
+                  {{ service.active ? 'Activo' : 'Inactivo' }}
+
+                </span>
+
+              </div>
+
+
+              <div class="item-acciones">
+
+                <button
+                  type="button"
+                  class="btn-editar"
+                  (click)="editarServicio(service)">
+
+                  Editar
+
+                </button>
+
+                <button
+                  type="button"
+                  class="btn-eliminar"
+                  (click)="eliminarServicio(service)">
+
+                  Eliminar
+
+                </button>
+
+              </div>
+
+            </div>
+
+          }
+
+
+          @if (services().length === 0) {
+
+            <div class="vacio">
+              No hay servicios registrados.
+            </div>
+
+          }
+
+        </div>
+
+      </div>
+
+    }
+
+  </article>
+
+
+  <!-- ========================================= -->
+  <!-- BOXES -->
+  <!-- ========================================= -->
+
+  <article class="modulo-catalogo">
+
+    <div class="modulo-header">
+
+      <div>
+        <span class="icono-modulo">+</span>
+
+        <div>
+          <h3>Boxes clínicos</h3>
+
+          <p>
+            Administra los espacios físicos de atención.
+          </p>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        class="btn-principal"
+        (click)="mostrarBoxes = !mostrarBoxes">
+
+        {{ mostrarBoxes ? 'Ocultar' : 'Ver boxes' }}
+
+      </button>
+
+    </div>
+
+
+    @if (mostrarBoxes) {
+
+      <div class="contenido-modulo">
+
+        <div class="barra-acciones">
+
+          <strong>
+            Boxes registrados:
+            {{ boxes().length }}
+          </strong>
+
+          <button
+            type="button"
+            class="btn-agregar"
+            (click)="nuevoBox()">
+
+            + Nuevo box
+
+          </button>
+
+        </div>
+
+
+        <!-- FORMULARIO BOX -->
+
+        @if (mostrarFormularioBox) {
+
+          <div class="formulario">
+
+            <h4>
+              {{ editandoBox
+                ? 'Editar box'
+                : 'Nuevo box' }}
+            </h4>
+
+
+            <div class="form-grid">
+
+              <label>
+                Nombre del box
+
+                <input
+                  type="text"
+                  [(ngModel)]="boxForm.name"
+                  placeholder="Ej: Box 2">
+              </label>
+
+
+              <label>
+                Centro de salud
+
+                <input
+                  type="text"
+                  [(ngModel)]="boxForm.centerName"
+                  placeholder="Ej: VidaSalud Santiago">
+              </label>
+
+            </div>
+
+
+            <label class="checkbox">
+
+              <input
+                type="checkbox"
+                [(ngModel)]="boxForm.active">
+
+              Box activo
+
+            </label>
+
+
+            <div class="acciones-form">
+
+              <button
+                type="button"
+                class="btn-secundario"
+                (click)="cancelarBox()">
+
+                Cancelar
+
+              </button>
+
+              <button
+                type="button"
+                class="btn-principal"
+                (click)="guardarBox()">
+
+                {{ editandoBox
+                  ? 'Guardar cambios'
+                  : 'Crear box' }}
+
+              </button>
+
+            </div>
+
+          </div>
+
+        }
+
+
+        <!-- LISTADO BOXES -->
+
+        <div class="lista-items">
+
+          @for (
+            box of boxes();
+            track box.id
+          ) {
+
+            <div class="item-admin">
+
+              <div class="item-info">
+
+                <strong>
+                  {{ box.name }}
+                </strong>
+
+                <span>
+                  {{ box.centerName }}
+                </span>
+
+                <span
+                  class="estado"
+                  [class.inactivo]="!box.active">
+
+                  {{ box.active ? 'Activo' : 'Inactivo' }}
+
+                </span>
+
+              </div>
+
+
+              <div class="item-acciones">
+
+                <button
+                  type="button"
+                  class="btn-editar"
+                  (click)="editarBox(box)">
+
+                  Editar
+
+                </button>
+
+                <button
+                  type="button"
+                  class="btn-eliminar"
+                  (click)="eliminarBox(box)">
+
+                  Eliminar
+
+                </button>
+
+              </div>
+
+            </div>
+
+          }
+
+
+          @if (boxes().length === 0) {
+
+            <div class="vacio">
+              No hay boxes registrados.
+            </div>
+
+          }
+
+        </div>
+
+      </div>
+
+    }
+
+  </article>
+
+
+  <!-- ========================================= -->
+  <!-- HORARIOS -->
+  <!-- ========================================= -->
+
+  <article class="modulo-catalogo">
+
+    <div class="modulo-header">
+
+      <div>
+        <span class="icono-modulo">+</span>
+
+        <div>
+          <h3>Horarios disponibles</h3>
+
+          <p>
+            Administra los bloques horarios disponibles
+            para las atenciones.
+          </p>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        class="btn-principal"
+        (click)="mostrarSlots = !mostrarSlots">
+
+        {{ mostrarSlots ? 'Ocultar' : 'Ver horarios' }}
+
+      </button>
+
+    </div>
+
+
+    @if (mostrarSlots) {
+
+      <div class="contenido-modulo">
+
+        <div class="barra-acciones">
+
+          <strong>
+            Horarios registrados:
+            {{ slots().length }}
+          </strong>
+
+          <button
+            type="button"
+            class="btn-agregar"
+            (click)="nuevoSlot()">
+
+            + Nuevo horario
+
+          </button>
+
+        </div>
+
+
+        <!-- FORMULARIO HORARIO -->
+
+        @if (mostrarFormularioSlot) {
+
+          <div class="formulario">
+
+            <h4>
+              {{ editandoSlot
+                ? 'Editar horario'
+                : 'Nuevo horario' }}
+            </h4>
+
+
+            <div class="form-grid">
+
+              <label>
+                Servicio
+
+                <select
+                  [(ngModel)]="slotForm.serviceId">
+
+                  <option [ngValue]="0">
+                    Seleccionar servicio
+                  </option>
+
+                  @for (
+                    service of services();
+                    track service.id
+                  ) {
+
+                    <option
+                      [ngValue]="service.id">
+
+                      {{ service.name }}
+
+                    </option>
+
+                  }
+
+                </select>
+
+              </label>
+
+
+              <label>
+                Box
+
+                <select
+                  [(ngModel)]="slotForm.boxId">
+
+                  <option [ngValue]="0">
+                    Seleccionar box
+                  </option>
+
+                  @for (
+                    box of boxes();
+                    track box.id
+                  ) {
+
+                    <option
+                      [ngValue]="box.id">
+
+                      {{ box.name }}
+
+                    </option>
+
+                  }
+
+                </select>
+
+              </label>
+
+
+              <label>
+                Fecha y hora
+
+                <input
+                  type="datetime-local"
+                  [(ngModel)]="slotForm.startTime">
+
+              </label>
+
+            </div>
+
+
+            <label class="checkbox">
+
+              <input
+                type="checkbox"
+                [(ngModel)]="slotForm.available">
+
+              Horario disponible
+
+            </label>
+
+
+            <div class="acciones-form">
+
+              <button
+                type="button"
+                class="btn-secundario"
+                (click)="cancelarSlot()">
+
+                Cancelar
+
+              </button>
+
+              <button
+                type="button"
+                class="btn-principal"
+                (click)="guardarSlot()">
+
+                {{ editandoSlot
+                  ? 'Guardar cambios'
+                  : 'Crear horario' }}
+
+              </button>
+
+            </div>
+
+          </div>
+
+        }
+
+
+        <!-- LISTADO HORARIOS -->
+
+        <div class="lista-items">
+
+          @for (
+            slot of slots();
+            track slot.id
+          ) {
+
+            <div class="item-admin">
+
+              <div class="item-info">
+
+                <strong>
+                  {{ slot.serviceName }}
+                </strong>
+
+                <span>
+                  {{ slot.boxName }}
+                </span>
+
+                <small>
+                  {{ formatearFecha(slot.startTime) }}
+                </small>
+
+                <span
+                  class="estado"
+                  [class.inactivo]="!slot.available">
+
+                  {{ slot.available
+                    ? 'Disponible'
+                    : 'No disponible' }}
+
+                </span>
+
+              </div>
+
+
+              <div class="item-acciones">
+
+                <button
+                  type="button"
+                  class="btn-editar"
+                  (click)="editarSlot(slot)">
+
+                  Editar
+
+                </button>
+
+                <button
+                  type="button"
+                  class="btn-eliminar"
+                  (click)="eliminarSlot(slot)">
+
+                  Eliminar
+
+                </button>
+
+              </div>
+
+            </div>
+
+          }
+
+
+          @if (slots().length === 0) {
+
+            <div class="vacio">
+              No hay horarios registrados.
+            </div>
+
+          }
+
+        </div>
+
+      </div>
+
+    }
+
+  </article>
 
 </section>

@@ -1,54 +1,663 @@
 <section class="pagina-citas">
 
-    <header class="encabezado-pagina">
+  <!-- ===================================================== -->
+  <!-- ENCABEZADO -->
+  <!-- ===================================================== -->
+
+  <header class="encabezado-pagina">
+
+    <div>
+
+      <span class="etiqueta-seccion">
+        Gestión de citas
+      </span>
+
+      <h2>Citas</h2>
+
+      <p>
+        Consulta y administra las atenciones registradas en VidaSalud.
+      </p>
+
+    </div>
+
+
+    <button
+      type="button"
+      class="btn-principal"
+      (click)="abrirFormulario()">
+
+      + Nueva cita
+
+    </button>
+
+  </header>
+
+
+  <!-- ===================================================== -->
+  <!-- MENSAJE ÉXITO -->
+  <!-- ===================================================== -->
+
+  @if (mensaje) {
+
+    <div class="estado-exito">
+
+      {{ mensaje }}
+
+    </div>
+
+  }
+
+
+  <!-- ===================================================== -->
+  <!-- MENSAJE ERROR -->
+  <!-- ===================================================== -->
+
+  @if (error) {
+
+    <div class="estado-error">
+
+      {{ error }}
+
+    </div>
+
+  }
+
+
+  <!-- ===================================================== -->
+  <!-- FORMULARIO NUEVA CITA -->
+  <!-- ===================================================== -->
+
+  @if (mostrarFormulario) {
+
+    <section class="panel-formulario">
+
+      <div class="encabezado-panel">
 
         <div>
-        <span class="etiqueta-seccion">
-            Gestión de citas
-        </span>
 
-        <h2>Citas</h2>
+          <h3>Nueva cita</h3>
 
-        <p>
-            Consulta y administra las atenciones registradas en VidaSalud.
-        </p>
-        </div>
-
-    </header>
-
-
-    <section class="panel-citas">
-
-        <div class="encabezado-panel">
-
-        <div>
-            <h3>Listado de citas</h3>
-
-            <p>
-            Las citas disponibles se mostrarán aquí cuando
-            el módulo esté conectado al backend.
-            </p>
-        </div>
+          <p>
+            Complete los datos para registrar una nueva atención.
+          </p>
 
         </div>
 
+      </div>
 
-        <div class="estado-sin-datos">
 
-        <div class="icono-estado">
-            +
+      <div class="formulario-cita">
+
+
+        <!-- PACIENTE -->
+
+        <div class="campo">
+
+          <label for="paciente">
+            Paciente
+          </label>
+
+          <input
+            id="paciente"
+            type="text"
+            [(ngModel)]="pacienteId"
+            placeholder="Ej: PAC001">
+
         </div>
 
-        <h3>Sin datos cargados</h3>
 
-        <p>
-            La estructura de esta pantalla está preparada.
-            Los datos reales se integrarán desde el servicio
-            de citas cuando el backend esté disponible.
-        </p>
+        <!-- SERVICIO -->
+
+        <div class="campo">
+
+          <label for="servicio">
+            Prestación
+          </label>
+
+          <select
+            id="servicio"
+            [(ngModel)]="servicioId">
+
+            <option [ngValue]="null">
+              Seleccionar prestación
+            </option>
+
+            @for (
+              servicio of servicios;
+              track servicio.id
+            ) {
+
+              <option
+                [ngValue]="servicio.id">
+
+                {{
+                  servicio.name ||
+                  servicio.nombre ||
+                  ('Servicio #' + servicio.id)
+                }}
+
+              </option>
+
+            }
+
+          </select>
 
         </div>
+
+
+        <!-- BOX -->
+
+        <div class="campo">
+
+          <label for="box">
+            Box
+          </label>
+
+          <select
+            id="box"
+            [(ngModel)]="boxId">
+
+            <option [ngValue]="null">
+              Sin asignar
+            </option>
+
+            @for (
+              box of boxes;
+              track box.id
+            ) {
+
+              <option
+                [ngValue]="box.id">
+
+                {{
+                  box.name ||
+                  box.nombre ||
+                  ('Box #' + box.id)
+                }}
+
+              </option>
+
+            }
+
+          </select>
+
+        </div>
+
+
+        <!-- FECHA -->
+
+        <div class="campo">
+
+          <label for="fecha">
+            Fecha
+          </label>
+
+          <input
+            id="fecha"
+            type="date"
+            [(ngModel)]="fecha">
+
+        </div>
+
+
+        <!-- HORA -->
+
+        <div class="campo">
+
+          <label for="hora">
+            Hora
+          </label>
+
+          <input
+            id="hora"
+            type="time"
+            [(ngModel)]="hora">
+
+        </div>
+
+      </div>
+
+
+      <!-- ACCIONES -->
+
+      <div class="acciones-formulario">
+
+        <button
+          type="button"
+          class="btn-secundario"
+          (click)="cerrarFormulario()"
+          [disabled]="guardando">
+
+          Cancelar
+
+        </button>
+
+
+        <button
+          type="button"
+          class="btn-principal"
+          (click)="crearCita()"
+          [disabled]="guardando">
+
+          {{
+            guardando
+              ? 'Guardando...'
+              : 'Crear cita'
+          }}
+
+        </button>
+
+      </div>
 
     </section>
+
+  }
+
+
+  <!-- ===================================================== -->
+  <!-- LISTADO -->
+  <!-- ===================================================== -->
+
+  <section class="panel-citas">
+
+
+    <!-- ENCABEZADO DEL LISTADO -->
+
+    <div class="encabezado-panel">
+
+      <div>
+
+        <h3>Listado de citas</h3>
+
+        <p>
+          Citas registradas actualmente en el sistema.
+        </p>
+
+      </div>
+
+
+      <!-- BOTÓN ACTUALIZAR -->
+
+      <button
+        type="button"
+        class="btn-secundario"
+        (click)="actualizarCitas()"
+        [disabled]="cargando">
+
+        {{
+          cargando
+            ? 'Cargando...'
+            : 'Actualizar'
+        }}
+
+      </button>
+
+    </div>
+
+
+    <!-- ================================================= -->
+    <!-- CARGANDO -->
+    <!-- ================================================= -->
+
+    @if (cargando) {
+
+      <div class="estado-sin-datos">
+
+        <h3>
+          Cargando citas...
+        </h3>
+
+        <p>
+          Consultando información del backend.
+        </p>
+
+      </div>
+
+    }
+
+
+    <!-- ================================================= -->
+    <!-- SIN CITAS -->
+    <!-- ================================================= -->
+
+    @if (
+      !cargando &&
+      citas.length === 0 &&
+      !error
+    ) {
+
+      <div class="estado-sin-datos">
+
+        <div class="icono-estado">
+          +
+        </div>
+
+        <h3>
+          Sin citas registradas
+        </h3>
+
+        <p>
+          No existen citas disponibles para mostrar.
+        </p>
+
+      </div>
+
+    }
+
+
+    <!-- ================================================= -->
+    <!-- TABLA -->
+    <!-- ================================================= -->
+
+    @if (
+      !cargando &&
+      citas.length > 0
+    ) {
+
+      <div class="tabla-contenedor">
+
+        <table>
+
+          <thead>
+
+            <tr>
+
+              <th>ID</th>
+
+              <th>Paciente</th>
+
+              <th>Prestación</th>
+
+              <th>Box</th>
+
+              <th>Fecha</th>
+
+              <th>Estado</th>
+
+              <th>Acciones</th>
+
+            </tr>
+
+          </thead>
+
+
+          <tbody>
+
+            @for (
+              cita of citas;
+              track cita.id
+            ) {
+
+              <tr>
+
+
+                <!-- ================================================= -->
+                <!-- ID -->
+                <!-- ================================================= -->
+
+                <td>
+                  {{ cita.id }}
+                </td>
+
+
+                <!-- ================================================= -->
+                <!-- PACIENTE -->
+                <!-- ================================================= -->
+
+                <td>
+                  {{ cita.patientId }}
+                </td>
+
+
+                <!-- ================================================= -->
+                <!-- PRESTACIÓN -->
+                <!-- ================================================= -->
+
+                <td>
+
+                  @if (editandoId !== cita.id) {
+
+                    {{ cita.serviceId }}
+
+                  }
+
+                  @else {
+
+                    <select
+                      [(ngModel)]="editServicioId">
+
+                      @for (
+                        servicio of servicios;
+                        track servicio.id
+                      ) {
+
+                        <option
+                          [ngValue]="servicio.id">
+
+                          {{
+                            servicio.name ||
+                            servicio.nombre ||
+                            ('Servicio #' + servicio.id)
+                          }}
+
+                        </option>
+
+                      }
+
+                    </select>
+
+                  }
+
+                </td>
+
+
+                <!-- ================================================= -->
+                <!-- BOX -->
+                <!-- ================================================= -->
+
+                <td>
+
+                  @if (editandoId !== cita.id) {
+
+                    {{
+                      cita.boxId ??
+                      'Sin asignar'
+                    }}
+
+                  }
+
+                  @else {
+
+                    <select
+                      [(ngModel)]="editBoxId">
+
+                      <option [ngValue]="null">
+                        Sin asignar
+                      </option>
+
+                      @for (
+                        box of boxes;
+                        track box.id
+                      ) {
+
+                        <option
+                          [ngValue]="box.id">
+
+                          {{
+                            box.name ||
+                            box.nombre ||
+                            ('Box #' + box.id)
+                          }}
+
+                        </option>
+
+                      }
+
+                    </select>
+
+                  }
+
+                </td>
+
+
+                <!-- ================================================= -->
+                <!-- FECHA -->
+                <!-- ================================================= -->
+
+                <td>
+
+                  @if (editandoId !== cita.id) {
+
+                    {{
+                      cita.appointmentDate
+                      | date:'dd/MM/yyyy HH:mm'
+                    }}
+
+                  }
+
+                  @else {
+
+                    <input
+                      type="date"
+                      [(ngModel)]="editFecha">
+
+                    <input
+                      type="time"
+                      [(ngModel)]="editHora">
+
+                  }
+
+                </td>
+
+
+                <!-- ================================================= -->
+                <!-- ESTADO -->
+                <!-- ================================================= -->
+
+                <td>
+
+                  @if (editandoId !== cita.id) {
+
+                    <select
+                      [ngModel]="cita.status"
+                      (ngModelChange)="
+                        cambiarEstado(cita, $event)
+                      ">
+
+                      <option value="SOLICITADA">
+                        SOLICITADA
+                      </option>
+
+                      <option value="CONFIRMADA">
+                        CONFIRMADA
+                      </option>
+
+                      <option value="EN_ESPERA">
+                        EN ESPERA
+                      </option>
+
+                      <option value="EN_ATENCION">
+                        EN ATENCIÓN
+                      </option>
+
+                      <option value="CERRADA">
+                        CERRADA
+                      </option>
+
+                      <option value="CANCELADA">
+                        CANCELADA
+                      </option>
+
+                    </select>
+
+                  }
+
+                  @else {
+
+                    <span class="estado-cita">
+                      {{ cita.status }}
+                    </span>
+
+                  }
+
+                </td>
+
+
+                <!-- ================================================= -->
+                <!-- ACCIONES -->
+                <!-- ================================================= -->
+
+                <td>
+
+
+                  @if (editandoId !== cita.id) {
+
+                    <button
+                      type="button"
+                      class="btn-secundario"
+                      (click)="editarCita(cita)"
+                      [disabled]="actualizando">
+
+                      Editar
+
+                    </button>
+
+
+                    <button
+                      type="button"
+                      class="btn-peligro"
+                      (click)="eliminarCita(cita)">
+
+                      Eliminar
+
+                    </button>
+
+                  }
+
+
+                  @else {
+
+                    <button
+                      type="button"
+                      class="btn-principal"
+                      (click)="guardarEdicion(cita)"
+                      [disabled]="actualizando">
+
+                      {{
+                        actualizando
+                          ? 'Guardando...'
+                          : 'Guardar'
+                      }}
+
+                    </button>
+
+
+                    <button
+                      type="button"
+                      class="btn-secundario"
+                      (click)="cancelarEdicion()"
+                      [disabled]="actualizando">
+
+                      Cancelar
+
+                    </button>
+
+                  }
+
+                </td>
+
+              </tr>
+
+            }
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    }
+
+  </section>
 
 </section>

@@ -33,6 +33,7 @@ import {
 } from '@azure/msal-angular';
 
 import { routes } from './app.routes';
+import { environment } from '../environments/environment';
 
 
 // ==========================================
@@ -61,9 +62,9 @@ export function MSALInstanceFactory(): IPublicClientApplication {
         'https://login.microsoftonline.com/990d84ca-63d0-44d9-89f7-3515a5520b0c',
 
       // Desarrollo local
-      redirectUri: 'http://localhost:4200',
+        redirectUri: environment.redirectUri,
 
-      postLogoutRedirectUri: 'http://localhost:4200'
+        postLogoutRedirectUri: environment.redirectUri
     },
 
     cache: {
@@ -117,7 +118,7 @@ export function MSALInterceptorConfigFactory(): MsalInterceptorConfiguration {
 
  // BFF VidaSalud
 protectedResourceMap.set(
-  'http://54.160.192.249:8080',
+  `${environment.apiUrl}/api/bff/*`,
   [
     VIDA_SALUD_API_SCOPE
   ]
