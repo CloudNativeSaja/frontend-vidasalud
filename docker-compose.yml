@@ -1,0 +1,16 @@
+# VidaSalud - frontend (Angular servido por nginx dentro del contenedor)
+#
+# Local:  docker compose up -d --build        -> http://localhost
+# EC2:    FRONT_BIND=127.0.0.1:8080 docker compose up -d --no-build
+#         (el nginx del host termina el HTTPS y reenvia a 127.0.0.1:8080)
+name: vidasalud-front
+
+services:
+  frontend:
+    build: .
+    image: vidasalud/frontend:local
+    container_name: vidasalud-frontend
+    restart: unless-stopped
+    ports:
+      - "${FRONT_BIND:-0.0.0.0:80}:80"
+    mem_limit: 128m
