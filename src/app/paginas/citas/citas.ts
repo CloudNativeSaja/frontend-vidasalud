@@ -771,6 +771,10 @@ export class Citas implements OnInit {
           err
         );
 
+        // Se recarga primero la lista (esto limpia this.error) para que el selector
+        // vuelva al estado real de la cita; el mensaje se fija a continuacion.
+        this.cargarCitas();
+
 
         if (err.status === 403) {
 
@@ -783,6 +787,16 @@ export class Citas implements OnInit {
 
           this.error =
             'El estado enviado no es válido.';
+
+        }
+
+        else if (err.status === 409) {
+
+          // Regla de negocio (por ejemplo, transicion de estado no permitida):
+          // se muestra el mensaje real que envia el servicio de citas
+          this.error =
+            err.error?.message ??
+            'El cambio de estado no está permitido.';
 
         }
 

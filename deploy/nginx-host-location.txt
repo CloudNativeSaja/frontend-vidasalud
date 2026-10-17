@@ -1,0 +1,19 @@
+# Cambio en el nginx del HOST de la EC2 del front (HTTPS lo sigue manejando Certbot).
+# Archivo donde esta el bloque (buscar con: sudo grep -rl "root /var/www/vidasalud" /etc/nginx)
+#
+# ANTES (en el server de 443):
+#     root /var/www/vidasalud;
+#     location / {
+#         try_files $uri $uri/ /index.html;
+#     }
+#
+# DESPUES (se elimina la linea "root" y el location pasa a ser un proxy al contenedor):
+    location / {
+        proxy_pass http://127.0.0.1:8080;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+# No tocar las lineas ssl_certificate, listen 443 ssl ni el server de puerto 80:
+# Certbot las gestiona y la renovacion automatica sigue funcionando.
