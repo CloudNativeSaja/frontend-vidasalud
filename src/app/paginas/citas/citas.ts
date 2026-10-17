@@ -15,6 +15,11 @@ import {
 } from '../../services/appointments.service';
 
 import { CatalogService } from '../../services/catalog.service';
+import {
+  ETIQUETAS_ESTADO,
+  esEstadoFinal,
+  estadosDisponibles
+} from './estados-cita';
 
 
 @Component({
@@ -58,6 +63,23 @@ export class Citas implements OnInit {
   error = '';
 
   mensaje = '';
+
+
+  // =========================================================
+  // TRANSICIONES DE ESTADO PERMITIDAS (ver estados-cita.ts)
+  // =========================================================
+
+  readonly etiquetasEstado = ETIQUETAS_ESTADO;
+
+  /** Estado actual más los estados a los que la cita puede pasar. */
+  estadosDisponibles(estadoActual: string): string[] {
+    return estadosDisponibles(estadoActual);
+  }
+
+  /** CERRADA y CANCELADA son finales: el selector se bloquea. */
+  esEstadoFinal(estadoActual: string): boolean {
+    return esEstadoFinal(estadoActual);
+  }
 
 
   // =========================================================
