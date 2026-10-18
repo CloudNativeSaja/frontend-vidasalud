@@ -540,33 +540,21 @@
 
                     <select
                       [ngModel]="cita.status"
+                      [disabled]="esEstadoFinal(cita.status)"
                       (ngModelChange)="
                         cambiarEstado(cita, $event)
                       ">
 
-                      <option value="SOLICITADA">
-                        SOLICITADA
-                      </option>
+                      @for (
+                        estado of estadosDisponibles(cita.status);
+                        track estado
+                      ) {
 
-                      <option value="CONFIRMADA">
-                        CONFIRMADA
-                      </option>
+                        <option [value]="estado">
+                          {{ etiquetasEstado[estado] ?? estado }}
+                        </option>
 
-                      <option value="EN_ESPERA">
-                        EN ESPERA
-                      </option>
-
-                      <option value="EN_ATENCION">
-                        EN ATENCIÓN
-                      </option>
-
-                      <option value="CERRADA">
-                        CERRADA
-                      </option>
-
-                      <option value="CANCELADA">
-                        CANCELADA
-                      </option>
+                      }
 
                     </select>
 
