@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-40 -40 80 80">
+  <circle r="40" fill="#13403A"/>
+  <g fill="#C9E86F">
+    <path d="M0 -4 C -8 -10 -9 -22 0 -29 C 9 -22 8 -10 0 -4Z"/>
+    <path d="M0 -4 C -8 -10 -9 -22 0 -29 C 9 -22 8 -10 0 -4Z" transform="rotate(90)"/>
+    <path d="M0 -4 C -8 -10 -9 -22 0 -29 C 9 -22 8 -10 0 -4Z" transform="rotate(180)"/>
+    <path d="M0 -4 C -8 -10 -9 -22 0 -29 C 9 -22 8 -10 0 -4Z" transform="rotate(270)"/>
+  </g>
+  <circle r="4.5" fill="#F5F2EC"/>
+</svg>

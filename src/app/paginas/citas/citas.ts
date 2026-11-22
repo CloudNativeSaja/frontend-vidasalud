@@ -1,929 +1,380 @@
-import {
-  Component,
-  OnInit,
-  ChangeDetectorRef
-} from '@angular/core';
-
 import { DatePipe } from '@angular/common';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { MsalService } from '@azure/msal-angular';
 import { finalize } from 'rxjs';
 
+import { RolesService } from '../../auth/roles.service';
 import {
-  AppointmentsService,
-  AppointmentResponse
+  AppointmentResponse,
+  AppointmentStatus,
+  AppointmentsService
 } from '../../services/appointments.service';
-
-import { CatalogService } from '../../services/catalog.service';
 import {
-  ETIQUETAS_ESTADO,
-  esEstadoFinal,
-  estadosDisponibles
-} from './estados-cita';
-
+  CatalogService,
+  ClinicalBox,
+  HealthService
+} from '../../services/catalog.service';
+import { NOMBRE_ESTADO } from '../../shared/estados';
+import { Icono } from '../../shared/icono';
+import { esEstadoFinal, estadosDisponibles } from './estados-cita';
 
 @Component({
-  imports: [
-    DatePipe,
-    FormsModule
-  ],
-
+  imports: [DatePipe, FormsModule, Icono],
   selector: 'app-citas',
-
   styleUrl: './citas.css',
-
   templateUrl: './citas.html',
 })
-
-
 export class Citas implements OnInit {
 
+  private readonly appointmentsService = inject(AppointmentsService);
+  private readonly catalogService = inject(CatalogService);
+
+  protected readonly sesion = inject(RolesService);
+  protected readonly nombreEstado = NOMBRE_ESTADO;
 
   // =========================================================
-  // DATOS
+  // PERMISOS
   // =========================================================
 
-  citas: AppointmentResponse[] = [];
+  /** ADMIN y RECEPCIONISTA crean, editan, cambian estado y eliminan. */
+  protected readonly puedeGestionar = computed(() =>
+    this.sesion.tieneAlguno(['ADMIN', 'RECEPCIONISTA'])
+  );
 
-  servicios: any[] = [];
-
-  boxes: any[] = [];
-
-
-  // =========================================================
-  // ESTADOS
-  // =========================================================
-
-  cargando = false;
-
-  guardando = false;
-
-  actualizando = false;
-
-  error = '';
-
-  mensaje = '';
-
+  /** El paciente solo ve y solicita sus propias citas. */
+  protected readonly esPaciente = computed(() =>
+    !this.puedeGestionar() && this.sesion.tiene('PACIENTE')
+  );
 
   // =========================================================
-  // TRANSICIONES DE ESTADO PERMITIDAS (ver estados-cita.ts)
+  // DATOS Y ESTADO
   // =========================================================
 
-  readonly etiquetasEstado = ETIQUETAS_ESTADO;
+  protected readonly citas = signal<AppointmentResponse[]>([]);
+  protected readonly servicios = signal<HealthService[]>([]);
+  protected readonly boxes = signal<ClinicalBox[]>([]);
 
-  /** Estado actual más los estados a los que la cita puede pasar. */
-  estadosDisponibles(estadoActual: string): string[] {
-    return estadosDisponibles(estadoActual);
-  }
+  protected readonly cargando = signal(false);
+  protected readonly guardando = signal(false);
+  protected readonly actualizando = signal(false);
+  protected readonly listadoNoPermitido = signal(false);
+  protected readonly error = signal('');
+  protected readonly mensaje = signal('');
 
-  /** CERRADA y CANCELADA son finales: el selector se bloquea. */
-  esEstadoFinal(estadoActual: string): boolean {
-    return esEstadoFinal(estadoActual);
-  }
+  protected readonly citasVisibles = computed(() => {
+    const todas = [...this.citas()].sort((a, b) =>
+      b.appointmentDate.localeCompare(a.appointmentDate)
+    );
 
+    if (!this.esPaciente()) return todas;
+
+    const oid = this.sesion.oid();
+    return todas.filter(cita => cita.patientId === oid);
+  });
 
   // =========================================================
   // FORMULARIO NUEVA CITA
   // =========================================================
 
-  mostrarFormulario = false;
-
+  mostrarFormulario = signal(false);
   pacienteId = '';
-
   servicioId: number | null = null;
-
   boxId: number | null = null;
-
   fecha = '';
-
   hora = '10:00';
-
 
   // =========================================================
   // EDICIÓN
   // =========================================================
 
-  editandoId: number | null = null;
-
+  editandoId = signal<number | null>(null);
   editServicioId: number | null = null;
-
   editBoxId: number | null = null;
-
   editFecha = '';
-
   editHora = '';
 
-
-  // =========================================================
-  // CONSTRUCTOR
-  // =========================================================
-
-  constructor(
-    private appointmentsService: AppointmentsService,
-    private catalogService: CatalogService,
-    private msalService: MsalService,
-    private cdr: ChangeDetectorRef
-  ) {}
-
-
-  // =========================================================
-  // INICIO
-  // =========================================================
-
   ngOnInit(): void {
-
-    const accounts =
-      this.msalService.instance.getAllAccounts();
-
-    console.log(
-      'CUENTAS MSAL:',
-      accounts
-    );
-
-    console.log(
-      'CUENTA ACTIVA:',
-      this.msalService.instance.getActiveAccount()
-    );
-
     this.cargarCitas();
-
     this.cargarCatalogo();
   }
 
+  estadosDisponibles(estadoActual: string): string[] {
+    return estadosDisponibles(estadoActual);
+  }
+
+  esEstadoFinal(estadoActual: string): boolean {
+    return esEstadoFinal(estadoActual);
+  }
+
+  nombreServicio(id: number): string {
+    return this.servicios().find(s => s.id === id)?.name ?? `Prestación #${id}`;
+  }
+
+  nombreBox(id: number | null): string {
+    if (id === null) return 'Sin asignar';
+    return this.boxes().find(b => b.id === id)?.name ?? `Box #${id}`;
+  }
 
   // =========================================================
-  // CARGAR CITAS
+  // CARGA
   // =========================================================
 
   cargarCitas(): void {
-
-    console.log('>>> CARGANDO CITAS');
-
-    this.cargando = true;
-
-    this.error = '';
-
-    this.cdr.detectChanges();
-
+    this.cargando.set(true);
+    this.error.set('');
 
     this.appointmentsService.findAll()
-
-      .pipe(
-
-        finalize(() => {
-
-          console.log(
-            '>>> FINALIZÓ CARGA DE CITAS'
-          );
-
-          this.cargando = false;
-
-          this.cdr.detectChanges();
-
-        })
-
-      )
-
+      .pipe(finalize(() => this.cargando.set(false)))
       .subscribe({
-
-        next: (data) => {
-
-          console.log(
-            '>>> CITAS RECIBIDAS:',
-            data
-          );
-
-          this.citas = [...data];
-
-          console.log(
-            '>>> CANTIDAD CITAS:',
-            this.citas.length
-          );
-
+        next: data => {
+          this.listadoNoPermitido.set(false);
+          this.citas.set(data);
         },
+        error: err => {
+          if (err.status === 403 && this.esPaciente()) {
+            // El BFF todavía no expone un listado filtrado por paciente.
+            this.listadoNoPermitido.set(true);
+            return;
+          }
 
-
-        error: (err) => {
-
-          console.error(
-            '>>> ERROR CARGANDO CITAS:',
-            err
-          );
-
-          this.citas = [];
-
-          this.error =
-            'No fue posible cargar las citas desde el backend.';
-
+          this.citas.set([]);
+          this.error.set('No fue posible cargar las citas desde el backend.');
         }
-
       });
-
   }
-
-
-  // =========================================================
-  // BOTÓN ACTUALIZAR
-  // =========================================================
 
   actualizarCitas(): void {
-
-    console.log(
-      '>>> BOTÓN ACTUALIZAR PRESIONADO'
-    );
-
-    this.mensaje = '';
-
-    this.error = '';
-
+    this.mensaje.set('');
     this.cargarCitas();
-
   }
-
-
-  // =========================================================
-  // CARGAR CATÁLOGO
-  // =========================================================
 
   cargarCatalogo(): void {
+    this.catalogService.getServices().subscribe({
+      next: data => this.servicios.set(data)
+    });
 
-
-    // -------------------------------------------------------
-    // SERVICIOS
-    // -------------------------------------------------------
-
-    this.catalogService.getServices()
-
-      .subscribe({
-
-        next: (data) => {
-
-          console.log(
-            'SERVICIOS:',
-            data
-          );
-
-          this.servicios = data;
-
-          this.cdr.detectChanges();
-
-        },
-
-        error: (err) => {
-
-          console.error(
-            'Error cargando servicios:',
-            err
-          );
-
-        }
-
-      });
-
-
-    // -------------------------------------------------------
-    // BOXES
-    // -------------------------------------------------------
-
-    this.catalogService.getBoxes()
-
-      .subscribe({
-
-        next: (data) => {
-
-          console.log(
-            'BOXES:',
-            data
-          );
-
-          this.boxes = data;
-
-          this.cdr.detectChanges();
-
-        },
-
-        error: (err) => {
-
-          console.error(
-            'Error cargando boxes:',
-            err
-          );
-
-        }
-
-      });
-
+    this.catalogService.getBoxes().subscribe({
+      next: data => this.boxes.set(data)
+    });
   }
 
-
   // =========================================================
-  // ABRIR FORMULARIO
+  // CREAR
   // =========================================================
 
   abrirFormulario(): void {
-
-    this.mostrarFormulario = true;
-
-    this.error = '';
-
-    this.mensaje = '';
-
+    this.mostrarFormulario.set(true);
+    this.error.set('');
+    this.mensaje.set('');
     this.pacienteId = '';
-
     this.servicioId = null;
-
     this.boxId = null;
-
     this.fecha = '';
-
     this.hora = '10:00';
-
-    this.cdr.detectChanges();
-
   }
-
-
-  // =========================================================
-  // CERRAR FORMULARIO
-  // =========================================================
 
   cerrarFormulario(): void {
-
-    this.mostrarFormulario = false;
-
-    this.error = '';
-
-    this.mensaje = '';
-
+    this.mostrarFormulario.set(false);
+    this.error.set('');
   }
-
-
-  // =========================================================
-  // CREAR CITA
-  // =========================================================
 
   crearCita(): void {
+    this.error.set('');
+    this.mensaje.set('');
 
-    this.error = '';
+    const paciente = this.esPaciente()
+      ? this.sesion.oid()
+      : this.pacienteId.trim();
 
-    this.mensaje = '';
-
-
-    // -------------------------------------------------------
-    // PACIENTE
-    // -------------------------------------------------------
-
-    if (!this.pacienteId.trim()) {
-
-      this.error =
-        'Debe ingresar el identificador del paciente.';
-
+    if (!paciente) {
+      this.error.set('Debe ingresar el identificador del paciente.');
       return;
-
     }
-
-
-    // -------------------------------------------------------
-    // SERVICIO
-    // -------------------------------------------------------
 
     if (!this.servicioId) {
-
-      this.error =
-        'Debe seleccionar una prestación.';
-
+      this.error.set('Debe seleccionar una prestación.');
       return;
-
     }
 
-
-    // -------------------------------------------------------
-    // FECHA
-    // -------------------------------------------------------
-
-    if (!this.fecha) {
-
-      this.error =
-        'Debe seleccionar una fecha.';
-
+    if (!this.fecha || !this.hora) {
+      this.error.set('Debe seleccionar fecha y hora.');
       return;
-
     }
 
+    const appointmentDate = `${this.fecha}T${this.hora}:00`;
 
-    // -------------------------------------------------------
-    // HORA
-    // -------------------------------------------------------
-
-    if (!this.hora) {
-
-      this.error =
-        'Debe seleccionar una hora.';
-
+    if (!this.esFechaFutura(appointmentDate)) {
+      this.error.set('La fecha y hora de la cita deben ser futuras.');
       return;
-
     }
 
-
-    const appointmentDate =
-      `${this.fecha}T${this.hora}:00`;
-
-
-    const fechaSeleccionada =
-      new Date(appointmentDate);
-
-
-    // -------------------------------------------------------
-    // FECHA FUTURA
-    // -------------------------------------------------------
-
-    if (
-      isNaN(fechaSeleccionada.getTime()) ||
-      fechaSeleccionada <= new Date()
-    ) {
-
-      this.error =
-        'La fecha y hora de la cita deben ser futuras.';
-
-      return;
-
-    }
-
-
-    // -------------------------------------------------------
-    // CREAR
-    // -------------------------------------------------------
-
-    this.guardando = true;
-
+    this.guardando.set(true);
 
     this.appointmentsService.create({
-
-      patientId:
-        this.pacienteId.trim(),
-
-      serviceId:
-        this.servicioId,
-
-      boxId:
-        this.boxId,
-
+      patientId: paciente,
+      serviceId: this.servicioId,
+      boxId: this.boxId,
       appointmentDate
+    }).subscribe({
+      next: cita => {
+        this.guardando.set(false);
+        this.mostrarFormulario.set(false);
+        this.mensaje.set(`Cita #${cita.id} creada correctamente.`);
 
-    })
-
-    .subscribe({
-
-      next: (cita) => {
-
-        console.log(
-          '>>> CITA CREADA:',
-          cita
-        );
-
-        this.guardando = false;
-
-        this.mensaje =
-          `Cita #${cita.id} creada correctamente.`;
-
-        this.mostrarFormulario = false;
-
-        this.cargarCitas();
-
-        this.cdr.detectChanges();
-
+        if (this.listadoNoPermitido()) {
+          this.citas.update(lista => [...lista, cita]);
+        } else {
+          this.cargarCitas();
+        }
       },
-
-
-      error: (err) => {
-
-        console.error(
-          '>>> ERROR CREANDO CITA:',
-          err
+      error: err => {
+        this.guardando.set(false);
+        this.error.set(
+          err.status === 403
+            ? 'No tienes permisos para crear citas.'
+            : err.status === 400
+              ? 'Los datos de la cita no son válidos.'
+              : 'No fue posible crear la cita.'
         );
-
-        this.guardando = false;
-
-
-        if (err.status === 403) {
-
-          this.error =
-            'No tienes permisos para crear citas.';
-
-        }
-
-        else if (err.status === 400) {
-
-          this.error =
-            'Los datos de la cita no son válidos.';
-
-        }
-
-        else {
-
-          this.error =
-            'No fue posible crear la cita.';
-
-        }
-
-        this.cdr.detectChanges();
-
       }
-
     });
-
   }
 
-
   // =========================================================
-  // EDITAR CITA
+  // EDITAR
   // =========================================================
 
-  editarCita(
-    cita: AppointmentResponse
-  ): void {
+  editarCita(cita: AppointmentResponse): void {
+    const fecha = new Date(cita.appointmentDate);
 
-    this.editandoId = cita.id;
-
-    this.editServicioId =
-      cita.serviceId;
-
-    this.editBoxId =
-      cita.boxId;
-
-
-    const fecha =
-      new Date(cita.appointmentDate);
-
-
-    this.editFecha =
-      fecha.toISOString().substring(0, 10);
-
-    this.editHora =
-      fecha.toTimeString().substring(0, 5);
-
-
-    this.error = '';
-
-    this.mensaje = '';
-
-    this.cdr.detectChanges();
-
+    this.editandoId.set(cita.id);
+    this.editServicioId = cita.serviceId;
+    this.editBoxId = cita.boxId;
+    this.editFecha = cita.appointmentDate.substring(0, 10);
+    this.editHora = fecha.toTimeString().substring(0, 5);
+    this.error.set('');
+    this.mensaje.set('');
   }
-
-
-  // =========================================================
-  // CANCELAR EDICIÓN
-  // =========================================================
 
   cancelarEdicion(): void {
-
-    this.editandoId = null;
-
+    this.editandoId.set(null);
     this.editServicioId = null;
-
     this.editBoxId = null;
-
     this.editFecha = '';
-
     this.editHora = '';
-
-    this.cdr.detectChanges();
-
   }
 
-
-  // =========================================================
-  // GUARDAR EDICIÓN
-  // =========================================================
-
-  guardarEdicion(
-    cita: AppointmentResponse
-  ): void {
-
-    this.error = '';
-
-    this.mensaje = '';
-
+  guardarEdicion(cita: AppointmentResponse): void {
+    this.error.set('');
+    this.mensaje.set('');
 
     if (!this.editServicioId) {
-
-      this.error =
-        'Debe seleccionar una prestación.';
-
+      this.error.set('Debe seleccionar una prestación.');
       return;
-
     }
 
-
-    if (
-      !this.editFecha ||
-      !this.editHora
-    ) {
-
-      this.error =
-        'Debe seleccionar fecha y hora.';
-
+    if (!this.editFecha || !this.editHora) {
+      this.error.set('Debe seleccionar fecha y hora.');
       return;
-
     }
 
+    const appointmentDate = `${this.editFecha}T${this.editHora}:00`;
 
-    const appointmentDate =
-      `${this.editFecha}T${this.editHora}:00`;
-
-
-    const fechaSeleccionada =
-      new Date(appointmentDate);
-
-
-    if (
-      isNaN(fechaSeleccionada.getTime()) ||
-      fechaSeleccionada <= new Date()
-    ) {
-
-      this.error =
-        'La fecha y hora de la cita deben ser futuras.';
-
+    if (!this.esFechaFutura(appointmentDate)) {
+      this.error.set('La fecha y hora de la cita deben ser futuras.');
       return;
-
     }
 
+    this.actualizando.set(true);
 
-    this.actualizando = true;
-
-
-    this.appointmentsService.update(
-
-      cita.id,
-
-      {
-
-        serviceId:
-          this.editServicioId,
-
-        boxId:
-          this.editBoxId,
-
-        appointmentDate
-
-      }
-
-    )
-
-    .subscribe({
-
-      next: (actualizada) => {
-
-        console.log(
-          '>>> CITA ACTUALIZADA:',
-          actualizada
-        );
-
-        this.actualizando = false;
-
-        this.mensaje =
-          `Cita #${actualizada.id} actualizada correctamente.`;
-
+    this.appointmentsService.update(cita.id, {
+      serviceId: this.editServicioId,
+      boxId: this.editBoxId,
+      appointmentDate
+    }).subscribe({
+      next: actualizada => {
+        this.actualizando.set(false);
+        this.mensaje.set(`Cita #${actualizada.id} actualizada correctamente.`);
         this.cancelarEdicion();
-
         this.cargarCitas();
-
-        this.cdr.detectChanges();
-
       },
-
-
-      error: (err) => {
-
-        console.error(
-          '>>> ERROR ACTUALIZANDO CITA:',
-          err
+      error: err => {
+        this.actualizando.set(false);
+        this.error.set(
+          err.status === 403
+            ? 'No tienes permisos para actualizar citas.'
+            : err.status === 400
+              ? 'Los datos de la cita no son válidos.'
+              : 'No fue posible actualizar la cita.'
         );
-
-        this.actualizando = false;
-
-
-        if (err.status === 403) {
-
-          this.error =
-            'No tienes permisos para actualizar citas.';
-
-        }
-
-        else if (err.status === 400) {
-
-          this.error =
-            'Los datos de la cita no son válidos.';
-
-        }
-
-        else {
-
-          this.error =
-            'No fue posible actualizar la cita.';
-
-        }
-
-        this.cdr.detectChanges();
-
       }
-
     });
-
   }
-
 
   // =========================================================
   // CAMBIAR ESTADO
   // =========================================================
 
-  cambiarEstado(
+  cambiarEstado(cita: AppointmentResponse, status: AppointmentStatus): void {
+    this.error.set('');
+    this.mensaje.set('');
 
-    cita: AppointmentResponse,
-
-    status: AppointmentResponse['status']
-
-  ): void {
-
-    this.error = '';
-
-    this.mensaje = '';
-
-    console.log(
-      '>>> CAMBIANDO ESTADO:',
-      cita.id,
-      status
-    );
-
-
-    this.appointmentsService.updateStatus(
-
-      cita.id,
-
-      {
-        status
-      }
-
-    )
-
-    .subscribe({
-
-      next: (actualizada) => {
-
-        console.log(
-          '>>> ESTADO ACTUALIZADO:',
-          actualizada
+    this.appointmentsService.updateStatus(cita.id, { status }).subscribe({
+      next: actualizada => {
+        this.mensaje.set(
+          `Estado de la cita #${actualizada.id} actualizado correctamente.`
         );
-
-        this.mensaje =
-          `Estado de la cita #${actualizada.id} actualizado correctamente.`;
-
         this.cargarCitas();
-
-        this.cdr.detectChanges();
-
       },
-
-
-      error: (err) => {
-
-        console.error(
-          '>>> ERROR CAMBIANDO ESTADO:',
-          err
-        );
-
-        // Se recarga primero la lista (esto limpia this.error) para que el selector
-        // vuelva al estado real de la cita; el mensaje se fija a continuacion.
+      error: err => {
+        // Se recarga la lista para que el selector vuelva al estado real.
         this.cargarCitas();
 
-
-        if (err.status === 403) {
-
-          this.error =
-            'No tienes permisos para cambiar el estado de la cita.';
-
-        }
-
-        else if (err.status === 400) {
-
-          this.error =
-            'El estado enviado no es válido.';
-
-        }
-
-        else if (err.status === 409) {
-
-          // Regla de negocio (por ejemplo, transicion de estado no permitida):
-          // se muestra el mensaje real que envia el servicio de citas
-          this.error =
-            err.error?.message ??
-            'El cambio de estado no está permitido.';
-
-        }
-
-        else {
-
-          this.error =
-            'No fue posible cambiar el estado de la cita.';
-
-        }
-
-        this.cdr.detectChanges();
-
+        this.error.set(
+          err.status === 403
+            ? 'No tienes permisos para cambiar el estado de la cita.'
+            : err.status === 400
+              ? 'El estado enviado no es válido.'
+              : err.status === 409
+                // Regla de negocio: se muestra el mensaje del servicio de citas.
+                ? err.error?.message ?? 'El cambio de estado no está permitido.'
+                : 'No fue posible cambiar el estado de la cita.'
+        );
       }
-
     });
-
   }
 
-
   // =========================================================
-  // ELIMINAR CITA
+  // ELIMINAR
   // =========================================================
 
-  eliminarCita(
-    cita: AppointmentResponse
-  ): void {
-
-    const confirmar =
-      window.confirm(
-        `¿Está seguro de eliminar la cita #${cita.id}?`
-      );
-
-
-    if (!confirmar) {
-
+  eliminarCita(cita: AppointmentResponse): void {
+    if (!window.confirm(`¿Está seguro de eliminar la cita #${cita.id}?`)) {
       return;
-
     }
 
+    this.error.set('');
+    this.mensaje.set('');
 
-    this.error = '';
-
-    this.mensaje = '';
-
-
-    this.appointmentsService.delete(
-
-      cita.id
-
-    )
-
-    .subscribe({
-
+    this.appointmentsService.delete(cita.id).subscribe({
       next: () => {
-
-        console.log(
-          '>>> CITA ELIMINADA:',
-          cita.id
-        );
-
-        this.mensaje =
-          `Cita #${cita.id} eliminada correctamente.`;
-
+        this.mensaje.set(`Cita #${cita.id} eliminada correctamente.`);
         this.cargarCitas();
-
-        this.cdr.detectChanges();
-
       },
-
-
-      error: (err) => {
-
-        console.error(
-          '>>> ERROR ELIMINANDO CITA:',
-          err
+      error: err => {
+        this.error.set(
+          err.status === 403
+            ? 'No tienes permisos para eliminar citas.'
+            : err.status === 404
+              ? 'La cita no existe.'
+              : 'No fue posible eliminar la cita.'
         );
-
-
-        if (err.status === 403) {
-
-          this.error =
-            'No tienes permisos para eliminar citas.';
-
-        }
-
-        else if (err.status === 404) {
-
-          this.error =
-            'La cita no existe.';
-
-        }
-
-        else {
-
-          this.error =
-            'No fue posible eliminar la cita.';
-
-        }
-
-        this.cdr.detectChanges();
-
       }
-
     });
-
   }
 
+  private esFechaFutura(valor: string): boolean {
+    const fecha = new Date(valor);
+    return !isNaN(fecha.getTime()) && fecha > new Date();
+  }
 }

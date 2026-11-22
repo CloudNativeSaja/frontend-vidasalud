@@ -1,0 +1,188 @@
+.bienvenida .titulo {
+  margin: 8px 0 6px;
+}
+
+.rejilla {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+
+/* ===== Ticket ===== */
+
+.ticket {
+  position: relative;
+  padding: 26px;
+  border-radius: 22px;
+  background: var(--bosque);
+  color: var(--crema);
+}
+
+.ticket-cabecera {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+}
+
+.ticket-cabecera .antetitulo {
+  color: var(--lima);
+}
+
+.ticket-fecha {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px;
+  margin-top: 18px;
+  flex-wrap: wrap;
+}
+
+.dia {
+  font-size: 36px;
+  line-height: 1.05;
+}
+
+.dia::first-letter {
+  text-transform: uppercase;
+}
+
+.hora {
+  font-size: 34px;
+  line-height: 1;
+  color: var(--lima);
+}
+
+.ticket-servicio {
+  margin-top: 8px;
+  color: rgba(245, 242, 236, 0.75);
+}
+
+.corte {
+  margin: 22px -26px;
+  border-top: 2px dashed rgba(245, 242, 236, 0.2);
+  position: relative;
+}
+
+.corte::before,
+.corte::after {
+  content: "";
+  position: absolute;
+  top: -12px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--crema);
+}
+
+.corte::before {
+  left: -11px;
+}
+
+.corte::after {
+  right: -11px;
+}
+
+.avance {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+}
+
+.avance li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+  font-size: 12px;
+  text-align: center;
+  color: rgba(245, 242, 236, 0.55);
+}
+
+.avance li::before {
+  content: "";
+  position: absolute;
+  top: 6px;
+  right: 50%;
+  width: 100%;
+  height: 2px;
+  background: rgba(245, 242, 236, 0.2);
+}
+
+.avance li:first-child::before {
+  display: none;
+}
+
+.avance li.hecho::before {
+  background: var(--lima);
+}
+
+.avance .marca {
+  position: relative;
+  z-index: 1;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--bosque);
+  border: 2px solid rgba(245, 242, 236, 0.35);
+}
+
+.avance li.hecho {
+  color: var(--crema);
+}
+
+.avance li.hecho .marca {
+  background: var(--lima);
+  border-color: var(--lima);
+}
+
+.avance li.actual .marca {
+  box-shadow: 0 0 0 4px rgba(201, 232, 111, 0.3);
+}
+
+/* ===== Formulario ===== */
+
+.formulario {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.formulario > .btn {
+  align-self: flex-start;
+}
+
+/* ===== Historial ===== */
+
+.historial {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.historial li {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 0;
+  border-top: 1px solid var(--borde);
+  font-size: 14px;
+  flex-wrap: wrap;
+}
+
+.historial li:first-child {
+  border-top: 0;
+}
+
+.historial-servicio {
+  flex: 1;
+}
+
+@media (max-width: 860px) {
+  .rejilla {
+    grid-template-columns: 1fr;
+  }
+}

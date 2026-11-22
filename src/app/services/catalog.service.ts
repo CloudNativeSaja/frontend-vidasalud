@@ -163,6 +163,13 @@ export class CatalogService {
     );
   }
 
+  reserveSlot(id: number): Observable<Slot> {
+    return this.http.put<Slot>(
+      `${this.apiUrl}/slots/${id}/reserve`,
+      {}
+    );
+  }
+
   deleteSlot(id: number): Observable<void> {
     return this.http.delete<void>(
       `${this.apiUrl}/slots/${id}`

@@ -1,22 +1,27 @@
-<section class="pagina-catalogo">
+<section class="pagina">
 
   <!-- ========================================= -->
   <!-- ENCABEZADO -->
   <!-- ========================================= -->
 
-  <header class="encabezado-pagina">
-
-    <span class="etiqueta-seccion">
-      CATÁLOGO CLÍNICO
-    </span>
-
-    <h2>Catálogo</h2>
-
-    <p>
-      Administra los servicios, boxes y horarios disponibles
-      para la atención de pacientes.
-    </p>
-
+  <header class="cabecera">
+    <div>
+      <span class="antetitulo">Catálogo clínico</span>
+      <h1 class="titulo">Prestaciones, boxes y <em>horarios</em></h1>
+      <p>
+        @if (puedeEditar()) {
+          Administra los servicios, boxes y horarios disponibles para la atención de pacientes.
+        } @else {
+          Consulta los servicios, boxes y horarios disponibles para la atención de pacientes.
+        }
+      </p>
+    </div>
+    @if (!puedeEditar()) {
+      <span class="solo-lectura">
+        <app-icono nombre="candado" [tamano]="14" />
+        Solo lectura
+      </span>
+    }
   </header>
 
 
@@ -26,7 +31,7 @@
 
   @if (successMessage()) {
 
-    <div class="mensaje mensaje-exito">
+    <div class="aviso aviso-exito" role="status">
       {{ successMessage() }}
     </div>
 
@@ -34,7 +39,7 @@
 
   @if (errorMessage()) {
 
-    <div class="mensaje mensaje-error">
+    <div class="aviso aviso-error" role="alert">
       {{ errorMessage() }}
     </div>
 
@@ -50,20 +55,20 @@
     <div class="modulo-header">
 
       <div>
-        <span class="icono-modulo">+</span>
+        <span class="icono-modulo"><app-icono nombre="catalogo" /></span>
 
         <div>
           <h3>Servicios de salud</h3>
 
           <p>
-            Administra las prestaciones médicas disponibles.
+            Prestaciones médicas que se ofrecen.
           </p>
         </div>
       </div>
 
       <button
         type="button"
-        class="btn-principal"
+        class="btn btn-borde"
         (click)="mostrarServicios = !mostrarServicios">
 
         {{ mostrarServicios ? 'Ocultar' : 'Ver servicios' }}
@@ -84,14 +89,18 @@
             {{ services().length }}
           </strong>
 
+          @if (puedeEditar()) {
+
           <button
             type="button"
-            class="btn-agregar"
+            class="btn btn-lima btn-chico"
             (click)="nuevoServicio()">
 
             + Nuevo servicio
 
           </button>
+
+          }
 
         </div>
 
@@ -110,7 +119,7 @@
 
             <div class="form-grid">
 
-              <label>
+              <label class="campo">
                 Nombre
                 <input
                   type="text"
@@ -119,7 +128,7 @@
               </label>
 
 
-              <label>
+              <label class="campo">
                 Descripción
                 <input
                   type="text"
@@ -128,7 +137,7 @@
               </label>
 
 
-              <label>
+              <label class="campo">
                 Precio
                 <input
                   type="number"
@@ -137,7 +146,7 @@
               </label>
 
 
-              <label>
+              <label class="campo">
                 Duración (minutos)
                 <input
                   type="number"
@@ -148,7 +157,7 @@
             </div>
 
 
-            <label class="checkbox">
+            <label class="casilla">
 
               <input
                 type="checkbox"
@@ -163,7 +172,7 @@
 
               <button
                 type="button"
-                class="btn-secundario"
+                class="btn btn-borde"
                 (click)="cancelarServicio()">
 
                 Cancelar
@@ -172,7 +181,7 @@
 
               <button
                 type="button"
-                class="btn-principal"
+                class="btn btn-primario"
                 (click)="guardarServicio()">
 
                 {{ editandoServicio
@@ -216,7 +225,7 @@
 
                 <span
                   class="estado"
-                  [class.inactivo]="!service.active">
+                  [class.estado-activo]="service.active" [class.estado-inactivo]="!service.active">
 
                   {{ service.active ? 'Activo' : 'Inactivo' }}
 
@@ -225,11 +234,13 @@
               </div>
 
 
+              @if (puedeEditar()) {
+
               <div class="item-acciones">
 
                 <button
                   type="button"
-                  class="btn-editar"
+                  class="btn btn-borde btn-chico"
                   (click)="editarServicio(service)">
 
                   Editar
@@ -238,7 +249,7 @@
 
                 <button
                   type="button"
-                  class="btn-eliminar"
+                  class="btn btn-peligro btn-chico"
                   (click)="eliminarServicio(service)">
 
                   Eliminar
@@ -247,6 +258,8 @@
 
               </div>
 
+              }
+
             </div>
 
           }
@@ -254,7 +267,7 @@
 
           @if (services().length === 0) {
 
-            <div class="vacio">
+            <div class="vacio-lista">
               No hay servicios registrados.
             </div>
 
@@ -278,20 +291,20 @@
     <div class="modulo-header">
 
       <div>
-        <span class="icono-modulo">+</span>
+        <span class="icono-modulo"><app-icono nombre="panel" /></span>
 
         <div>
           <h3>Boxes clínicos</h3>
 
           <p>
-            Administra los espacios físicos de atención.
+            Espacios físicos de atención.
           </p>
         </div>
       </div>
 
       <button
         type="button"
-        class="btn-principal"
+        class="btn btn-borde"
         (click)="mostrarBoxes = !mostrarBoxes">
 
         {{ mostrarBoxes ? 'Ocultar' : 'Ver boxes' }}
@@ -312,14 +325,18 @@
             {{ boxes().length }}
           </strong>
 
+          @if (puedeEditar()) {
+
           <button
             type="button"
-            class="btn-agregar"
+            class="btn btn-lima btn-chico"
             (click)="nuevoBox()">
 
             + Nuevo box
 
           </button>
+
+          }
 
         </div>
 
@@ -339,7 +356,7 @@
 
             <div class="form-grid">
 
-              <label>
+              <label class="campo">
                 Nombre del box
 
                 <input
@@ -349,7 +366,7 @@
               </label>
 
 
-              <label>
+              <label class="campo">
                 Centro de salud
 
                 <input
@@ -361,7 +378,7 @@
             </div>
 
 
-            <label class="checkbox">
+            <label class="casilla">
 
               <input
                 type="checkbox"
@@ -376,7 +393,7 @@
 
               <button
                 type="button"
-                class="btn-secundario"
+                class="btn btn-borde"
                 (click)="cancelarBox()">
 
                 Cancelar
@@ -385,7 +402,7 @@
 
               <button
                 type="button"
-                class="btn-principal"
+                class="btn btn-primario"
                 (click)="guardarBox()">
 
                 {{ editandoBox
@@ -424,7 +441,7 @@
 
                 <span
                   class="estado"
-                  [class.inactivo]="!box.active">
+                  [class.estado-activo]="box.active" [class.estado-inactivo]="!box.active">
 
                   {{ box.active ? 'Activo' : 'Inactivo' }}
 
@@ -433,11 +450,13 @@
               </div>
 
 
+              @if (puedeEditar()) {
+
               <div class="item-acciones">
 
                 <button
                   type="button"
-                  class="btn-editar"
+                  class="btn btn-borde btn-chico"
                   (click)="editarBox(box)">
 
                   Editar
@@ -446,7 +465,7 @@
 
                 <button
                   type="button"
-                  class="btn-eliminar"
+                  class="btn btn-peligro btn-chico"
                   (click)="eliminarBox(box)">
 
                   Eliminar
@@ -455,6 +474,8 @@
 
               </div>
 
+              }
+
             </div>
 
           }
@@ -462,7 +483,7 @@
 
           @if (boxes().length === 0) {
 
-            <div class="vacio">
+            <div class="vacio-lista">
               No hay boxes registrados.
             </div>
 
@@ -486,21 +507,20 @@
     <div class="modulo-header">
 
       <div>
-        <span class="icono-modulo">+</span>
+        <span class="icono-modulo"><app-icono nombre="reloj" /></span>
 
         <div>
           <h3>Horarios disponibles</h3>
 
           <p>
-            Administra los bloques horarios disponibles
-            para las atenciones.
+            Bloques horarios para las atenciones.
           </p>
         </div>
       </div>
 
       <button
         type="button"
-        class="btn-principal"
+        class="btn btn-borde"
         (click)="mostrarSlots = !mostrarSlots">
 
         {{ mostrarSlots ? 'Ocultar' : 'Ver horarios' }}
@@ -521,14 +541,18 @@
             {{ slots().length }}
           </strong>
 
+          @if (puedeEditar()) {
+
           <button
             type="button"
-            class="btn-agregar"
+            class="btn btn-lima btn-chico"
             (click)="nuevoSlot()">
 
             + Nuevo horario
 
           </button>
+
+          }
 
         </div>
 
@@ -548,7 +572,7 @@
 
             <div class="form-grid">
 
-              <label>
+              <label class="campo">
                 Servicio
 
                 <select
@@ -577,7 +601,7 @@
               </label>
 
 
-              <label>
+              <label class="campo">
                 Box
 
                 <select
@@ -606,7 +630,7 @@
               </label>
 
 
-              <label>
+              <label class="campo">
                 Fecha y hora
 
                 <input
@@ -618,7 +642,7 @@
             </div>
 
 
-            <label class="checkbox">
+            <label class="casilla">
 
               <input
                 type="checkbox"
@@ -633,7 +657,7 @@
 
               <button
                 type="button"
-                class="btn-secundario"
+                class="btn btn-borde"
                 (click)="cancelarSlot()">
 
                 Cancelar
@@ -642,7 +666,7 @@
 
               <button
                 type="button"
-                class="btn-principal"
+                class="btn btn-primario"
                 (click)="guardarSlot()">
 
                 {{ editandoSlot
@@ -685,7 +709,7 @@
 
                 <span
                   class="estado"
-                  [class.inactivo]="!slot.available">
+                  [class.estado-activo]="slot.available" [class.estado-inactivo]="!slot.available">
 
                   {{ slot.available
                     ? 'Disponible'
@@ -696,11 +720,13 @@
               </div>
 
 
+              @if (puedeEditar()) {
+
               <div class="item-acciones">
 
                 <button
                   type="button"
-                  class="btn-editar"
+                  class="btn btn-borde btn-chico"
                   (click)="editarSlot(slot)">
 
                   Editar
@@ -709,7 +735,7 @@
 
                 <button
                   type="button"
-                  class="btn-eliminar"
+                  class="btn btn-peligro btn-chico"
                   (click)="eliminarSlot(slot)">
 
                   Eliminar
@@ -718,6 +744,8 @@
 
               </div>
 
+              }
+
             </div>
 
           }
@@ -725,7 +753,7 @@
 
           @if (slots().length === 0) {
 
-            <div class="vacio">
+            <div class="vacio-lista">
               No hay horarios registrados.
             </div>
 

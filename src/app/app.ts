@@ -1,6 +1,12 @@
-import { Component, inject, OnInit } from '@angular/core';
 import {
-  Router,
+  Component,
+  DestroyRef,
+  OnInit,
+  computed,
+  inject
+} from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import {
   RouterLink,
   RouterLinkActive,
   RouterOutlet
@@ -19,81 +25,92 @@ import {
 
 import { filter } from 'rxjs/operators';
 
+import { Rol, RolesService } from './auth/roles.service';
+import { Icono, NombreIcono } from './shared/icono';
+import { Logo } from './shared/logo';
+
+interface ItemMenu {
+  ruta: string;
+  etiqueta: string;
+  icono: NombreIcono;
+  roles: Rol[];
+}
+
+const MENU: ItemMenu[] = [
+  {
+    ruta: '/dashboard',
+    etiqueta: 'Panel',
+    icono: 'panel',
+    roles: ['ADMIN', 'RECEPCIONISTA', 'AUDITOR', 'PACIENTE']
+  },
+  {
+    ruta: '/citas',
+    etiqueta: 'Citas',
+    icono: 'calendario',
+    roles: ['ADMIN', 'RECEPCIONISTA', 'PACIENTE']
+  },
+  {
+    ruta: '/catalogo',
+    etiqueta: 'Catálogo',
+    icono: 'catalogo',
+    roles: ['ADMIN', 'RECEPCIONISTA']
+  },
+  {
+    ruta: '/reportes',
+    etiqueta: 'Reportes',
+    icono: 'grafico',
+    roles: ['ADMIN']
+  },
+  {
+    ruta: '/auditoria',
+    etiqueta: 'Auditoría',
+    icono: 'escudo',
+    roles: ['ADMIN', 'AUDITOR']
+  }
+];
+
+const EVENTOS_DE_SESION = new Set<EventType>([
+  EventType.INITIALIZE_END,
+  EventType.LOGIN_SUCCESS,
+  EventType.ACQUIRE_TOKEN_SUCCESS,
+  EventType.ACTIVE_ACCOUNT_CHANGED,
+  EventType.LOGOUT_SUCCESS
+]);
+
 @Component({
   selector: 'app-root',
-  imports: [RouterLink, RouterLinkActive, RouterOutlet],
+  imports: [RouterLink, RouterLinkActive, RouterOutlet, Icono, Logo],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
 export class App implements OnInit {
 
-  private msalService = inject(MsalService);
-  private msalBroadcastService = inject(MsalBroadcastService);
-  private router = inject(Router);
+  private readonly msalService = inject(MsalService);
+  private readonly msalBroadcastService = inject(MsalBroadcastService);
+  private readonly destroyRef = inject(DestroyRef);
 
-  estaEnInicio(): boolean {
-    return this.router.url === '/';
-  }
+  protected readonly sesion = inject(RolesService);
 
-  isLoggedIn = false;
-  userName = '';
+  protected readonly menu = computed(() =>
+    MENU.filter(item => this.sesion.tieneAlguno(item.roles))
+  );
 
   ngOnInit(): void {
-
     this.msalBroadcastService.msalSubject$
       .pipe(
-        filter(
-          (msg: EventMessage) =>
-            msg.eventType === EventType.INITIALIZE_END ||
-            msg.eventType === EventType.LOGIN_SUCCESS
-        )
+        filter((msg: EventMessage) => EVENTOS_DE_SESION.has(msg.eventType)),
+        takeUntilDestroyed(this.destroyRef)
       )
-      .subscribe((result: EventMessage) => {
-
-        if (result.eventType === EventType.LOGIN_SUCCESS) {
-          const payload = result.payload as AuthenticationResult;
-
-          this.msalService.instance.setActiveAccount(
-            payload.account
-          );
+      .subscribe((msg: EventMessage) => {
+        if (msg.eventType === EventType.LOGIN_SUCCESS) {
+          const payload = msg.payload as AuthenticationResult;
+          this.msalService.instance.setActiveAccount(payload.account);
         }
 
-        this.checkLoginStatus();
+        this.sesion.sincronizar();
       });
 
-    this.checkLoginStatus();
-  }
-
-  private checkLoginStatus(): void {
-
-    const accounts =
-      this.msalService.instance.getAllAccounts();
-
-    let activeAccount =
-      this.msalService.instance.getActiveAccount();
-
-    if (!activeAccount && accounts.length > 0) {
-      activeAccount = accounts[0];
-
-      this.msalService.instance.setActiveAccount(
-        activeAccount
-      );
-    }
-
-    this.isLoggedIn = !!activeAccount;
-
-    this.userName =
-      activeAccount?.name ??
-      activeAccount?.username ??
-      '';
-  }
-
-  login(): void {
-    this.msalService.loginRedirect({
-      scopes: [
-        'api://964063ab-9c14-41ca-9ecb-9b6d3891e750/access_as_user'
-      ]
-    });
+    this.sesion.sincronizar();
   }
 
   logout(): void {

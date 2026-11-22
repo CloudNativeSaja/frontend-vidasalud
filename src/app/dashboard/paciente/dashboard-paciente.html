@@ -1,0 +1,156 @@
+<section class="pagina">
+
+  <header class="banner banner-claro bienvenida">
+    <span class="antetitulo">Mis atenciones</span>
+    <h1 class="titulo">{{ saludo }}, <em>{{ sesion.primerNombre() }}</em>.</h1>
+    <p class="texto-2">Revisa tu próxima cita o solicita una nueva hora.</p>
+  </header>
+
+  @if (mensaje()) {
+    <div class="aviso aviso-exito" role="status">{{ mensaje() }}</div>
+  }
+  @if (error()) {
+    <div class="aviso aviso-error" role="alert">{{ error() }}</div>
+  }
+
+  <div class="rejilla">
+
+    <!-- Próxima cita -->
+    @if (proximaCita(); as cita) {
+      <article class="ticket">
+        <div class="ticket-cabecera">
+          <span class="antetitulo">Próxima cita</span>
+          <span class="mono">#{{ cita.id }}</span>
+        </div>
+
+        <div class="ticket-fecha">
+          <span class="serif dia">{{ cita.appointmentDate | date: "EEEE d 'de' MMMM" }}</span>
+          <span class="mono hora">{{ cita.appointmentDate | date: 'HH:mm' }}</span>
+        </div>
+
+        <p class="ticket-servicio">{{ nombreServicio(cita.serviceId) }}</p>
+
+        <div class="corte" aria-hidden="true"></div>
+
+        <ol class="avance" [attr.aria-label]="'Estado: ' + nombreEstado[cita.status]">
+          @for (paso of pasos; track paso.estado; let i = $index) {
+            <li
+              [class.hecho]="i <= pasoActual(cita.status)"
+              [class.actual]="i === pasoActual(cita.status)">
+              <span class="marca"></span>
+              <span class="etiqueta">{{ paso.etiqueta }}</span>
+            </li>
+          }
+        </ol>
+      </article>
+    } @else {
+      <article class="tarjeta">
+        <div class="vacio">
+          <span class="vacio-icono"><app-icono nombre="calendario" [tamano]="22" /></span>
+          <h3>No tienes citas <em>pendientes</em></h3>
+          <p>Cuando solicites una hora, la verás aquí con su avance.</p>
+        </div>
+      </article>
+    }
+
+    <!-- Solicitar -->
+    <article class="tarjeta">
+      <div class="tarjeta-cabecera">
+        <div>
+          <h3>Solicitar una hora</h3>
+          <p>Solo se muestran horarios con cupo.</p>
+        </div>
+      </div>
+
+      <div class="formulario">
+        <label class="campo">
+          Prestación
+          <select (change)="elegirServicio($any($event.target).value)" [disabled]="enviando()">
+            <option value="" [selected]="servicioId() === null">Selecciona una prestación</option>
+            @for (servicio of servicios(); track servicio.id) {
+              <option [value]="servicio.id" [selected]="servicioId() === servicio.id">
+                {{ servicio.name }}
+              </option>
+            }
+          </select>
+        </label>
+
+        @if (servicioId() !== null) {
+          <div class="campo">
+            Día
+            @if (diasDisponibles().length > 0) {
+              <div class="chips">
+                @for (d of diasDisponibles(); track d) {
+                  <button type="button" class="chip" [class.activo]="dia() === d" (click)="elegirDia(d)">
+                    {{ d + 'T00:00:00' | date: 'EEE d MMM' }}
+                  </button>
+                }
+              </div>
+            } @else {
+              <p class="texto-2">
+                {{ cargandoCatalogo() ? 'Buscando horarios…' : 'No hay horarios con cupo para esta prestación.' }}
+              </p>
+            }
+          </div>
+        }
+
+        @if (dia()) {
+          <div class="campo">
+            Hora
+            <div class="chips">
+              @for (slot of horasDelDia(); track slot.id) {
+                <button
+                  type="button"
+                  class="chip mono"
+                  [class.activo]="slotId() === slot.id"
+                  (click)="slotId.set(slot.id)"
+                  [attr.title]="slot.boxName">
+                  {{ slot.startTime | date: 'HH:mm' }}
+                </button>
+              }
+            </div>
+          </div>
+        }
+
+        <button
+          type="button"
+          class="btn btn-primario"
+          (click)="solicitar()"
+          [disabled]="slotId() === null || enviando()">
+          {{ enviando() ? 'Enviando…' : 'Solicitar hora' }}
+        </button>
+      </div>
+    </article>
+
+  </div>
+
+  <!-- Historial -->
+  <article class="tarjeta">
+    <div class="tarjeta-cabecera">
+      <div>
+        <h3>Historial</h3>
+        <p>Tus atenciones, de la más reciente a la más antigua.</p>
+      </div>
+    </div>
+
+    @if (historial().length > 0) {
+      <ul class="historial">
+        @for (cita of historial(); track cita.id) {
+          <li>
+            <span class="mono texto-2">{{ cita.appointmentDate | date: 'dd/MM/yyyy HH:mm' }}</span>
+            <span class="historial-servicio">{{ nombreServicio(cita.serviceId) }}</span>
+            <span class="estado estado-{{ cita.status }}">{{ nombreEstado[cita.status] }}</span>
+          </li>
+        }
+      </ul>
+    } @else if (!historialDisponible()) {
+      <p class="aviso aviso-info">
+        Tu historial todavía no se puede consultar desde aquí. Las solicitudes
+        que hagas en esta sesión aparecerán en esta lista.
+      </p>
+    } @else {
+      <p class="texto-2">Aún no tienes atenciones registradas.</p>
+    }
+  </article>
+
+</section>

@@ -1,55 +1,42 @@
-<section class="pagina-reportes">
+<section class="pagina">
 
-    <header class="encabezado-pagina">
+  <header class="cabecera">
+    <div>
+      <span class="antetitulo">Información y resultados</span>
+      <h1 class="titulo">Reportes de <em>operación</em></h1>
+      <p>
+        Indicadores calculados con las citas y el catálogo vigentes.
+        @if (actualizado(); as fecha) {
+          Actualizado a las <span class="mono">{{ fecha | date: 'HH:mm' }}</span>.
+        }
+      </p>
+    </div>
 
-        <span class="etiqueta-seccion">
-        Información y resultados
-        </span>
+    <button type="button" class="btn btn-borde" (click)="cargar()" [disabled]="cargando()">
+      <app-icono nombre="actualizar" [tamano]="16" />
+      {{ cargando() ? 'Calculando…' : 'Actualizar' }}
+    </button>
+  </header>
 
-        <h2>Reportes</h2>
+  @if (resumen(); as r) {
+    <article class="tarjeta">
+      <app-kpis-operacion [resumen]="r" />
+    </article>
 
+    <app-resumen-graficos [resumen]="r" />
+  } @else if (error()) {
+    <div class="tarjeta">
+      <div class="vacio">
+        <span class="vacio-icono"><app-icono nombre="grafico" [tamano]="22" /></span>
+        <h3>Los reportes no están <em>disponibles</em></h3>
         <p>
-        Consulta la información generada a partir de la operación de VidaSalud.
+          No pudimos obtener la información desde el servidor.
+          Revisa que el backend esté en línea e inténtalo de nuevo.
         </p>
-
-    </header>
-
-
-    <section class="panel-reportes">
-
-        <div class="encabezado-panel">
-
-        <div>
-            <h3>Panel de reportes</h3>
-
-            <p>
-            Los reportes estarán disponibles cuando este módulo
-            sea integrado con los servicios correspondientes.
-            </p>
-        </div>
-
-        </div>
-
-
-        <div class="estado-sin-datos">
-
-        <div class="icono-estado">
-            +
-        </div>
-
-        <h3>Reportes pendientes de integración</h3>
-
-        <p>
-            Esta sección está preparada para presentar información
-            y resultados obtenidos desde el backend de VidaSalud.
-        </p>
-
-        <span class="estado-modulo">
-            Pendiente de integración
-        </span>
-
-        </div>
-
-    </section>
+      </div>
+    </div>
+  } @else {
+    <div class="tarjeta"><p class="texto-2">Calculando indicadores…</p></div>
+  }
 
 </section>
