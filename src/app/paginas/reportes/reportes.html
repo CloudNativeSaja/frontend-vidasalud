@@ -23,8 +23,9 @@
             <h3>Panel de reportes</h3>
 
             <p>
-            Los reportes estarán disponibles cuando este módulo
-            sea integrado con los servicios correspondientes.
+            Los indicadores se calculan a partir de los eventos de citas
+            publicados en Kafka (tópico vidasalud.appointments.events)
+            y se consultan a través del BFF.
             </p>
         </div>
 
@@ -40,8 +41,9 @@
         <h3>Reportes pendientes de integración</h3>
 
         <p>
-            Esta sección está preparada para presentar información
-            y resultados obtenidos desde el backend de VidaSalud.
+            Esta sección mostrará los KPIs de ms-vidasalud-report:
+            /api/report/kpis (últimas 24 h) y /api/report/top-services
+            (últimos 7 días), actualizados casi en tiempo real.
         </p>
 
         <span class="estado-modulo">
