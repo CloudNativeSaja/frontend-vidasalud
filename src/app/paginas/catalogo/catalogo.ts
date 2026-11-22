@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -8,13 +8,16 @@ import {
   ClinicalBox,
   Slot
 } from '../../services/catalog.service';
+import { RolesService } from '../../auth/roles.service';
+import { Icono } from '../../shared/icono';
 
 @Component({
   selector: 'app-catalogo',
   standalone: true,
   imports: [
     CommonModule,
-    FormsModule
+    FormsModule,
+    Icono
   ],
   templateUrl: './catalogo.html',
   styleUrl: './catalogo.css'
@@ -22,6 +25,11 @@ import {
 export class Catalogo implements OnInit {
 
   private catalogService = inject(CatalogService);
+
+  private sesion = inject(RolesService);
+
+  /** Solo ADMIN crea, edita y elimina. Recepción ve el catálogo en solo lectura. */
+  puedeEditar = computed(() => this.sesion.tiene('ADMIN'));
 
   // =========================
   // DATOS
@@ -110,7 +118,6 @@ export class Catalogo implements OnInit {
     this.catalogService.getServices()
       .subscribe({
         next: data => {
-          console.log('Servicios:', data);
           this.services.set(data);
         },
         error: error => {
@@ -125,7 +132,6 @@ export class Catalogo implements OnInit {
     this.catalogService.getBoxes()
       .subscribe({
         next: data => {
-          console.log('Boxes:', data);
           this.boxes.set(data);
         },
         error: error => {
@@ -140,7 +146,6 @@ export class Catalogo implements OnInit {
     this.catalogService.getSlots()
       .subscribe({
         next: data => {
-          console.log('Slots:', data);
           this.slots.set(data);
         },
         error: error => {

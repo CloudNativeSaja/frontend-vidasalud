@@ -1,0 +1,69 @@
+<section class="pagina">
+
+  <header class="banner">
+    <div class="saludo">
+      <span class="antetitulo">{{ hoy | date: "EEEE d 'de' MMMM" }}</span>
+      <h1 class="titulo">{{ saludo }}, <em>{{ sesion.primerNombre() }}</em>.</h1>
+      <p>
+        @if (sesion.tiene('ADMIN')) {
+          Así va la operación de VidaSalud.
+        } @else {
+          Vista de la operación en modo solo lectura.
+        }
+      </p>
+    </div>
+
+    @if (resumen(); as r) {
+      <app-kpis-operacion [resumen]="r" />
+    } @else if (cargando()) {
+      <p class="cargando">Calculando indicadores…</p>
+    }
+  </header>
+
+  @if (error()) {
+    <div class="tarjeta">
+      <div class="vacio">
+        <span class="vacio-icono"><app-icono nombre="grafico" [tamano]="22" /></span>
+        <h3>Los indicadores no están <em>disponibles</em></h3>
+        <p>
+          No pudimos obtener las citas y el catálogo desde el servidor.
+          Revisa que el backend esté en línea e inténtalo de nuevo.
+        </p>
+        <button type="button" class="btn btn-borde" (click)="cargar()">
+          <app-icono nombre="actualizar" [tamano]="16" />
+          Reintentar
+        </button>
+      </div>
+    </div>
+  }
+
+  @if (resumen(); as r) {
+    <app-resumen-graficos [resumen]="r" />
+  }
+
+  <nav class="accesos" aria-label="Accesos rápidos">
+    @if (sesion.tiene('ADMIN')) {
+      <a routerLink="/citas" class="tarjeta acceso">
+        <app-icono nombre="calendario" />
+        <span><strong>Citas</strong>Gestiona agenda y estados</span>
+        <app-icono nombre="flecha" [tamano]="16" />
+      </a>
+      <a routerLink="/catalogo" class="tarjeta acceso">
+        <app-icono nombre="catalogo" />
+        <span><strong>Catálogo</strong>Prestaciones, boxes y horarios</span>
+        <app-icono nombre="flecha" [tamano]="16" />
+      </a>
+      <a routerLink="/reportes" class="tarjeta acceso">
+        <app-icono nombre="grafico" />
+        <span><strong>Reportes</strong>Detalle de indicadores</span>
+        <app-icono nombre="flecha" [tamano]="16" />
+      </a>
+    }
+    <a routerLink="/auditoria" class="tarjeta acceso">
+      <app-icono nombre="escudo" />
+      <span><strong>Auditoría</strong>Trazabilidad de eventos</span>
+      <app-icono nombre="flecha" [tamano]="16" />
+    </a>
+  </nav>
+
+</section>

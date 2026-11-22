@@ -1,57 +1,58 @@
-<section class="pagina-reportes">
+<section class="pagina">
 
-    <header class="encabezado-pagina">
+  <header class="cabecera">
+    <div>
+      <span class="antetitulo">Información y resultados</span>
+      <h1 class="titulo">Reportes de <em>operación</em></h1>
+      <p>
+        Indicadores de ms-vidasalud-report, alimentados por los eventos de
+        citas publicados en Kafka y consultados a través del BFF.
+        @if (actualizado(); as fecha) {
+          Actualizado a las <span class="mono">{{ fecha | date: 'HH:mm' }}</span>.
+        }
+      </p>
+    </div>
 
-        <span class="etiqueta-seccion">
-        Información y resultados
-        </span>
+    <button type="button" class="btn btn-borde" (click)="cargar()" [disabled]="cargando()">
+      <app-icono nombre="actualizar" [tamano]="16" />
+      {{ cargando() ? 'Calculando…' : 'Actualizar' }}
+    </button>
+  </header>
 
-        <h2>Reportes</h2>
+  @if (resumen(); as r) {
+    @if (r.origen === 'kafka') {
+      <p class="aviso aviso-info">
+        Fuente: eventos Kafka (vidasalud.appointments.events). KPIs de las últimas 24 h
+        y prestaciones de los últimos 7 días.
+        @if (r.ultimoEvento) {
+          Último evento procesado: <span class="mono">{{ r.ultimoEvento | date: 'dd/MM HH:mm:ss' }}</span>.
+        }
+      </p>
+    } @else {
+      <p class="aviso aviso-info">
+        El servicio de reportes (/api/bff/report) no respondió. Se muestran
+        indicadores calculados con las citas y el catálogo actuales.
+      </p>
+    }
 
+    <article class="tarjeta">
+      <app-kpis-operacion [resumen]="r" />
+    </article>
+
+    <app-resumen-graficos [resumen]="r" />
+  } @else if (error()) {
+    <div class="tarjeta">
+      <div class="vacio">
+        <span class="vacio-icono"><app-icono nombre="grafico" [tamano]="22" /></span>
+        <h3>Los reportes no están <em>disponibles</em></h3>
         <p>
-        Consulta la información generada a partir de la operación de VidaSalud.
+          No pudimos obtener la información desde el servidor.
+          Revisa que el backend esté en línea e inténtalo de nuevo.
         </p>
-
-    </header>
-
-
-    <section class="panel-reportes">
-
-        <div class="encabezado-panel">
-
-        <div>
-            <h3>Panel de reportes</h3>
-
-            <p>
-            Los indicadores se calculan a partir de los eventos de citas
-            publicados en Kafka (tópico vidasalud.appointments.events)
-            y se consultan a través del BFF.
-            </p>
-        </div>
-
-        </div>
-
-
-        <div class="estado-sin-datos">
-
-        <div class="icono-estado">
-            +
-        </div>
-
-        <h3>Reportes pendientes de integración</h3>
-
-        <p>
-            Esta sección mostrará los KPIs de ms-vidasalud-report:
-            /api/report/kpis (últimas 24 h) y /api/report/top-services
-            (últimos 7 días), actualizados casi en tiempo real.
-        </p>
-
-        <span class="estado-modulo">
-            Pendiente de integración
-        </span>
-
-        </div>
-
-    </section>
+      </div>
+    </div>
+  } @else {
+    <div class="tarjeta"><p class="texto-2">Calculando indicadores…</p></div>
+  }
 
 </section>

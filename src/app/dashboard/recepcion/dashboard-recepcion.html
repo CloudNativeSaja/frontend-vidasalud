@@ -1,0 +1,110 @@
+<section class="pagina">
+
+  <header class="cabecera">
+    <div>
+      <span class="antetitulo">Recepción · {{ hoy | date: "EEEE d 'de' MMMM" }}</span>
+      <h1 class="titulo">{{ saludo }}, <em>{{ sesion.primerNombre() }}</em>.</h1>
+      <p>Esta es la cola de atención. Avanza cada cita a su siguiente paso.</p>
+    </div>
+
+    <div class="chips" role="group" aria-label="Rango de citas">
+      <button type="button" class="chip" [class.activo]="soloHoy()" (click)="soloHoy.set(true)">
+        Hoy
+      </button>
+      <button type="button" class="chip" [class.activo]="!soloHoy()" (click)="soloHoy.set(false)">
+        Todas
+      </button>
+      <button type="button" class="chip" (click)="cargar()" [disabled]="cargando()">
+        <app-icono nombre="actualizar" [tamano]="14" />
+        Actualizar
+      </button>
+    </div>
+  </header>
+
+  @if (mensaje()) {
+    <div class="aviso aviso-exito" role="status">{{ mensaje() }}</div>
+  }
+  @if (error()) {
+    <div class="aviso aviso-error" role="alert">{{ error() }}</div>
+  }
+
+  <!-- Siguiente llamado -->
+  <article class="banner llamado">
+    @if (siguienteLlamado(); as cita) {
+      <div class="llamado-datos">
+        <span class="antetitulo">Siguiente llamado</span>
+        <h2 class="serif">{{ nombreServicio(cita.serviceId) }}</h2>
+        <p>
+          Paciente <span class="mono">{{ cita.patientId }}</span>
+          · {{ nombreBox(cita.boxId) }}
+        </p>
+      </div>
+      <div class="llamado-hora">
+        <span class="mono">{{ cita.appointmentDate | date: 'HH:mm' }}</span>
+        <span class="estado estado-{{ cita.status }}">{{ nombreEstado[cita.status] }}</span>
+      </div>
+      @if (siguienteEstado(cita.status); as destino) {
+        <button
+          type="button"
+          class="btn btn-lima"
+          (click)="avanzar(cita)"
+          [disabled]="procesando() === cita.id">
+          {{ accionHacia[destino] }}
+          <app-icono nombre="flecha" [tamano]="16" />
+        </button>
+      }
+    } @else {
+      <div class="llamado-datos">
+        <span class="antetitulo">Siguiente llamado</span>
+        <h2 class="serif">Nadie en espera <em>por ahora</em>.</h2>
+        <p>Cuando haya citas confirmadas o en espera aparecerán aquí.</p>
+      </div>
+    }
+  </article>
+
+  <!-- Tablero -->
+  @if (cargando() && citas().length === 0) {
+    <div class="tarjeta"><p class="texto-2">Cargando citas…</p></div>
+  } @else {
+    <div class="tablero">
+      @for (columna of columnas(); track columna.estado) {
+        <section class="columna" [attr.aria-label]="nombreEstado[columna.estado]">
+          <header class="columna-cabecera">
+            <span class="estado estado-{{ columna.estado }}">{{ nombreEstado[columna.estado] }}</span>
+            <span class="mono texto-2">{{ columna.citas.length }}</span>
+          </header>
+
+          @for (cita of columna.citas; track cita.id) {
+            <article class="ficha">
+              <div class="ficha-fila">
+                <span class="mono hora">{{ cita.appointmentDate | date: (soloHoy() ? 'HH:mm' : 'dd/MM HH:mm') }}</span>
+                <span class="mono texto-2">#{{ cita.id }}</span>
+              </div>
+              <strong>{{ nombreServicio(cita.serviceId) }}</strong>
+              <span class="texto-2 detalle">
+                <span class="mono">{{ cita.patientId }}</span> · {{ nombreBox(cita.boxId) }}
+              </span>
+              @if (siguienteEstado(cita.status); as destino) {
+                <button
+                  type="button"
+                  class="btn btn-borde btn-chico"
+                  (click)="avanzar(cita)"
+                  [disabled]="procesando() === cita.id">
+                  {{ procesando() === cita.id ? 'Guardando…' : accionHacia[destino] }}
+                </button>
+              }
+            </article>
+          } @empty {
+            <p class="columna-vacia">Sin citas</p>
+          }
+        </section>
+      }
+    </div>
+
+    <a routerLink="/citas" class="ver-todas">
+      Ver y gestionar todas las citas
+      <app-icono nombre="flecha" [tamano]="16" />
+    </a>
+  }
+
+</section>

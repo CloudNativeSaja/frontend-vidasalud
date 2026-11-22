@@ -1,651 +1,233 @@
-<section class="pagina-citas">
+<section class="pagina">
 
-  <!-- ===================================================== -->
-  <!-- ENCABEZADO -->
-  <!-- ===================================================== -->
-
-  <header class="encabezado-pagina">
-
+  <header class="cabecera">
     <div>
-
-      <span class="etiqueta-seccion">
-        Gestión de citas
-      </span>
-
-      <h2>Citas</h2>
-
+      <span class="antetitulo">{{ esPaciente() ? 'Mis citas' : 'Gestión de citas' }}</span>
+      <h1 class="titulo">
+        @if (esPaciente()) {
+          Tus <em>citas</em>
+        } @else {
+          Agenda de <em>citas</em>
+        }
+      </h1>
       <p>
-        Consulta y administra las atenciones registradas en VidaSalud.
+        @if (esPaciente()) {
+          Revisa el estado de tus atenciones o solicita una nueva.
+        } @else {
+          Consulta y administra las atenciones registradas en VidaSalud.
+        }
       </p>
-
     </div>
 
-
-    <button
-      type="button"
-      class="btn-principal"
-      (click)="abrirFormulario()">
-
-      + Nueva cita
-
-    </button>
-
+    <div class="acciones">
+      <button type="button" class="btn btn-borde" (click)="actualizarCitas()" [disabled]="cargando()">
+        <app-icono nombre="actualizar" [tamano]="16" />
+        {{ cargando() ? 'Cargando…' : 'Actualizar' }}
+      </button>
+      <button type="button" class="btn btn-primario" (click)="abrirFormulario()">
+        <app-icono nombre="mas" [tamano]="16" />
+        {{ esPaciente() ? 'Solicitar cita' : 'Nueva cita' }}
+      </button>
+    </div>
   </header>
 
-
-  <!-- ===================================================== -->
-  <!-- MENSAJE ÉXITO -->
-  <!-- ===================================================== -->
-
-  @if (mensaje) {
-
-    <div class="estado-exito">
-
-      {{ mensaje }}
-
-    </div>
-
+  @if (mensaje()) {
+    <div class="aviso aviso-exito" role="status">{{ mensaje() }}</div>
+  }
+  @if (error()) {
+    <div class="aviso aviso-error" role="alert">{{ error() }}</div>
   }
 
-
-  <!-- ===================================================== -->
-  <!-- MENSAJE ERROR -->
-  <!-- ===================================================== -->
-
-  @if (error) {
-
-    <div class="estado-error">
-
-      {{ error }}
-
-    </div>
-
-  }
-
-
-  <!-- ===================================================== -->
-  <!-- FORMULARIO NUEVA CITA -->
-  <!-- ===================================================== -->
-
-  @if (mostrarFormulario) {
-
-    <section class="panel-formulario">
-
-      <div class="encabezado-panel">
-
+  <!-- Formulario nueva cita -->
+  @if (mostrarFormulario()) {
+    <article class="tarjeta">
+      <div class="tarjeta-cabecera">
         <div>
-
-          <h3>Nueva cita</h3>
-
-          <p>
-            Complete los datos para registrar una nueva atención.
-          </p>
-
+          <h3>{{ esPaciente() ? 'Solicitar cita' : 'Nueva cita' }}</h3>
+          <p>Complete los datos para registrar la atención.</p>
         </div>
-
       </div>
 
-
-      <div class="formulario-cita">
-
-
-        <!-- PACIENTE -->
-
-        <div class="campo">
-
-          <label for="paciente">
+      <div class="campos">
+        @if (!esPaciente()) {
+          <label class="campo">
             Paciente
+            <input type="text" [(ngModel)]="pacienteId" placeholder="Identificador del paciente">
           </label>
+        }
 
-          <input
-            id="paciente"
-            type="text"
-            [(ngModel)]="pacienteId"
-            placeholder="Ej: PAC001">
-
-        </div>
-
-
-        <!-- SERVICIO -->
-
-        <div class="campo">
-
-          <label for="servicio">
-            Prestación
-          </label>
-
-          <select
-            id="servicio"
-            [(ngModel)]="servicioId">
-
-            <option [ngValue]="null">
-              Seleccionar prestación
-            </option>
-
-            @for (
-              servicio of servicios;
-              track servicio.id
-            ) {
-
-              <option
-                [ngValue]="servicio.id">
-
-                {{
-                  servicio.name ||
-                  servicio.nombre ||
-                  ('Servicio #' + servicio.id)
-                }}
-
-              </option>
-
+        <label class="campo">
+          Prestación
+          <select [(ngModel)]="servicioId">
+            <option [ngValue]="null">Seleccionar prestación</option>
+            @for (servicio of servicios(); track servicio.id) {
+              <option [ngValue]="servicio.id">{{ servicio.name }}</option>
             }
-
           </select>
+        </label>
 
-        </div>
-
-
-        <!-- BOX -->
-
-        <div class="campo">
-
-          <label for="box">
-            Box
-          </label>
-
-          <select
-            id="box"
-            [(ngModel)]="boxId">
-
-            <option [ngValue]="null">
-              Sin asignar
-            </option>
-
-            @for (
-              box of boxes;
-              track box.id
-            ) {
-
-              <option
-                [ngValue]="box.id">
-
-                {{
-                  box.name ||
-                  box.nombre ||
-                  ('Box #' + box.id)
-                }}
-
-              </option>
-
+        <label class="campo">
+          Box
+          <select [(ngModel)]="boxId">
+            <option [ngValue]="null">Sin asignar</option>
+            @for (box of boxes(); track box.id) {
+              <option [ngValue]="box.id">{{ box.name }}</option>
             }
-
           </select>
+        </label>
 
-        </div>
+        <label class="campo">
+          Fecha
+          <input type="date" [(ngModel)]="fecha">
+        </label>
 
-
-        <!-- FECHA -->
-
-        <div class="campo">
-
-          <label for="fecha">
-            Fecha
-          </label>
-
-          <input
-            id="fecha"
-            type="date"
-            [(ngModel)]="fecha">
-
-        </div>
-
-
-        <!-- HORA -->
-
-        <div class="campo">
-
-          <label for="hora">
-            Hora
-          </label>
-
-          <input
-            id="hora"
-            type="time"
-            [(ngModel)]="hora">
-
-        </div>
-
+        <label class="campo">
+          Hora
+          <input type="time" [(ngModel)]="hora">
+        </label>
       </div>
 
-
-      <!-- ACCIONES -->
-
-      <div class="acciones-formulario">
-
-        <button
-          type="button"
-          class="btn-secundario"
-          (click)="cerrarFormulario()"
-          [disabled]="guardando">
-
+      <div class="acciones pie-formulario">
+        <button type="button" class="btn btn-borde" (click)="cerrarFormulario()" [disabled]="guardando()">
           Cancelar
-
         </button>
-
-
-        <button
-          type="button"
-          class="btn-principal"
-          (click)="crearCita()"
-          [disabled]="guardando">
-
-          {{
-            guardando
-              ? 'Guardando...'
-              : 'Crear cita'
-          }}
-
+        <button type="button" class="btn btn-primario" (click)="crearCita()" [disabled]="guardando()">
+          {{ guardando() ? 'Guardando…' : (esPaciente() ? 'Enviar solicitud' : 'Crear cita') }}
         </button>
-
       </div>
-
-    </section>
-
+    </article>
   }
 
-
-  <!-- ===================================================== -->
-  <!-- LISTADO -->
-  <!-- ===================================================== -->
-
-  <section class="panel-citas">
-
-
-    <!-- ENCABEZADO DEL LISTADO -->
-
-    <div class="encabezado-panel">
-
+  <!-- Listado -->
+  <article class="tarjeta">
+    <div class="tarjeta-cabecera">
       <div>
-
-        <h3>Listado de citas</h3>
-
-        <p>
-          Citas registradas actualmente en el sistema.
-        </p>
-
+        <h3>{{ esPaciente() ? 'Mis citas' : 'Listado de citas' }}</h3>
+        <p>{{ citasVisibles().length }} citas</p>
       </div>
-
-
-      <!-- BOTÓN ACTUALIZAR -->
-
-      <button
-        type="button"
-        class="btn-secundario"
-        (click)="actualizarCitas()"
-        [disabled]="cargando">
-
-        {{
-          cargando
-            ? 'Cargando...'
-            : 'Actualizar'
-        }}
-
-      </button>
-
     </div>
 
-
-    <!-- ================================================= -->
-    <!-- CARGANDO -->
-    <!-- ================================================= -->
-
-    @if (cargando) {
-
-      <div class="estado-sin-datos">
-
-        <h3>
-          Cargando citas...
-        </h3>
-
-        <p>
-          Consultando información del backend.
-        </p>
-
+    @if (cargando() && citas().length === 0) {
+      <p class="texto-2">Consultando citas…</p>
+    } @else if (citasVisibles().length === 0) {
+      <div class="vacio">
+        <span class="vacio-icono"><app-icono nombre="calendario" [tamano]="22" /></span>
+        @if (listadoNoPermitido()) {
+          <h3>Tu historial aún no está <em>disponible</em></h3>
+          <p>
+            Todavía no es posible consultar tus citas desde aquí. Las que
+            solicites en esta sesión aparecerán en esta lista.
+          </p>
+        } @else {
+          <h3>Sin citas <em>registradas</em></h3>
+          <p>No hay citas para mostrar.</p>
+        }
       </div>
-
-    }
-
-
-    <!-- ================================================= -->
-    <!-- SIN CITAS -->
-    <!-- ================================================= -->
-
-    @if (
-      !cargando &&
-      citas.length === 0 &&
-      !error
-    ) {
-
-      <div class="estado-sin-datos">
-
-        <div class="icono-estado">
-          +
-        </div>
-
-        <h3>
-          Sin citas registradas
-        </h3>
-
-        <p>
-          No existen citas disponibles para mostrar.
-        </p>
-
-      </div>
-
-    }
-
-
-    <!-- ================================================= -->
-    <!-- TABLA -->
-    <!-- ================================================= -->
-
-    @if (
-      !cargando &&
-      citas.length > 0
-    ) {
-
-      <div class="tabla-contenedor">
-
-        <table>
-
+    } @else {
+      <div class="tabla-envoltorio">
+        <table class="tabla">
           <thead>
-
             <tr>
-
               <th>ID</th>
-
-              <th>Paciente</th>
-
+              @if (!esPaciente()) {
+                <th>Paciente</th>
+              }
               <th>Prestación</th>
-
               <th>Box</th>
-
               <th>Fecha</th>
-
               <th>Estado</th>
-
-              <th>Acciones</th>
-
+              @if (puedeGestionar()) {
+                <th><span class="oculto-visual">Acciones</span></th>
+              }
             </tr>
-
           </thead>
 
-
           <tbody>
-
-            @for (
-              cita of citas;
-              track cita.id
-            ) {
-
+            @for (cita of citasVisibles(); track cita.id) {
               <tr>
+                <td class="mono texto-2">#{{ cita.id }}</td>
 
-
-                <!-- ================================================= -->
-                <!-- ID -->
-                <!-- ================================================= -->
-
-                <td>
-                  {{ cita.id }}
-                </td>
-
-
-                <!-- ================================================= -->
-                <!-- PACIENTE -->
-                <!-- ================================================= -->
+                @if (!esPaciente()) {
+                  <td class="mono">{{ cita.patientId }}</td>
+                }
 
                 <td>
-                  {{ cita.patientId }}
-                </td>
-
-
-                <!-- ================================================= -->
-                <!-- PRESTACIÓN -->
-                <!-- ================================================= -->
-
-                <td>
-
-                  @if (editandoId !== cita.id) {
-
-                    {{ cita.serviceId }}
-
-                  }
-
-                  @else {
-
-                    <select
-                      [(ngModel)]="editServicioId">
-
-                      @for (
-                        servicio of servicios;
-                        track servicio.id
-                      ) {
-
-                        <option
-                          [ngValue]="servicio.id">
-
-                          {{
-                            servicio.name ||
-                            servicio.nombre ||
-                            ('Servicio #' + servicio.id)
-                          }}
-
-                        </option>
-
+                  @if (editandoId() === cita.id) {
+                    <select class="control" [(ngModel)]="editServicioId" aria-label="Prestación">
+                      @for (servicio of servicios(); track servicio.id) {
+                        <option [ngValue]="servicio.id">{{ servicio.name }}</option>
                       }
-
                     </select>
-
+                  } @else {
+                    {{ nombreServicio(cita.serviceId) }}
                   }
-
                 </td>
 
-
-                <!-- ================================================= -->
-                <!-- BOX -->
-                <!-- ================================================= -->
-
                 <td>
-
-                  @if (editandoId !== cita.id) {
-
-                    {{
-                      cita.boxId ??
-                      'Sin asignar'
-                    }}
-
-                  }
-
-                  @else {
-
-                    <select
-                      [(ngModel)]="editBoxId">
-
-                      <option [ngValue]="null">
-                        Sin asignar
-                      </option>
-
-                      @for (
-                        box of boxes;
-                        track box.id
-                      ) {
-
-                        <option
-                          [ngValue]="box.id">
-
-                          {{
-                            box.name ||
-                            box.nombre ||
-                            ('Box #' + box.id)
-                          }}
-
-                        </option>
-
+                  @if (editandoId() === cita.id) {
+                    <select class="control" [(ngModel)]="editBoxId" aria-label="Box">
+                      <option [ngValue]="null">Sin asignar</option>
+                      @for (box of boxes(); track box.id) {
+                        <option [ngValue]="box.id">{{ box.name }}</option>
                       }
-
                     </select>
-
+                  } @else {
+                    {{ nombreBox(cita.boxId) }}
                   }
-
                 </td>
 
-
-                <!-- ================================================= -->
-                <!-- FECHA -->
-                <!-- ================================================= -->
-
                 <td>
-
-                  @if (editandoId !== cita.id) {
-
-                    {{
-                      cita.appointmentDate
-                      | date:'dd/MM/yyyy HH:mm'
-                    }}
-
+                  @if (editandoId() === cita.id) {
+                    <div class="fecha-edicion">
+                      <input class="control" type="date" [(ngModel)]="editFecha" aria-label="Fecha">
+                      <input class="control" type="time" [(ngModel)]="editHora" aria-label="Hora">
+                    </div>
+                  } @else {
+                    <span class="mono">{{ cita.appointmentDate | date: 'dd/MM/yyyy HH:mm' }}</span>
                   }
-
-                  @else {
-
-                    <input
-                      type="date"
-                      [(ngModel)]="editFecha">
-
-                    <input
-                      type="time"
-                      [(ngModel)]="editHora">
-
-                  }
-
                 </td>
 
-
-                <!-- ================================================= -->
-                <!-- ESTADO -->
-                <!-- ================================================= -->
-
                 <td>
-
-                  @if (editandoId !== cita.id) {
-
+                  @if (puedeGestionar() && editandoId() !== cita.id && !esEstadoFinal(cita.status)) {
                     <select
+                      class="control selector-estado"
                       [ngModel]="cita.status"
-                      [disabled]="esEstadoFinal(cita.status)"
-                      (ngModelChange)="
-                        cambiarEstado(cita, $event)
-                      ">
-
-                      @for (
-                        estado of estadosDisponibles(cita.status);
-                        track estado
-                      ) {
-
-                        <option [value]="estado">
-                          {{ etiquetasEstado[estado] ?? estado }}
-                        </option>
-
+                      (ngModelChange)="cambiarEstado(cita, $event)"
+                      aria-label="Estado de la cita">
+                      @for (estado of estadosDisponibles(cita.status); track estado) {
+                        <option [value]="estado">{{ nombreEstado[estado] ?? estado }}</option>
                       }
-
                     </select>
-
+                  } @else {
+                    <span class="estado estado-{{ cita.status }}">{{ nombreEstado[cita.status] }}</span>
                   }
-
-                  @else {
-
-                    <span class="estado-cita">
-                      {{ cita.status }}
-                    </span>
-
-                  }
-
                 </td>
 
-
-                <!-- ================================================= -->
-                <!-- ACCIONES -->
-                <!-- ================================================= -->
-
-                <td>
-
-
-                  @if (editandoId !== cita.id) {
-
-                    <button
-                      type="button"
-                      class="btn-secundario"
-                      (click)="editarCita(cita)"
-                      [disabled]="actualizando">
-
-                      Editar
-
-                    </button>
-
-
-                    <button
-                      type="button"
-                      class="btn-peligro"
-                      (click)="eliminarCita(cita)">
-
-                      Eliminar
-
-                    </button>
-
-                  }
-
-
-                  @else {
-
-                    <button
-                      type="button"
-                      class="btn-principal"
-                      (click)="guardarEdicion(cita)"
-                      [disabled]="actualizando">
-
-                      {{
-                        actualizando
-                          ? 'Guardando...'
-                          : 'Guardar'
-                      }}
-
-                    </button>
-
-
-                    <button
-                      type="button"
-                      class="btn-secundario"
-                      (click)="cancelarEdicion()"
-                      [disabled]="actualizando">
-
-                      Cancelar
-
-                    </button>
-
-                  }
-
-                </td>
-
+                @if (puedeGestionar()) {
+                  <td class="celda-acciones">
+                    @if (editandoId() === cita.id) {
+                      <button type="button" class="btn btn-primario btn-chico" (click)="guardarEdicion(cita)" [disabled]="actualizando()">
+                        {{ actualizando() ? 'Guardando…' : 'Guardar' }}
+                      </button>
+                      <button type="button" class="btn btn-borde btn-chico" (click)="cancelarEdicion()" [disabled]="actualizando()">
+                        Cancelar
+                      </button>
+                    } @else {
+                      <button type="button" class="btn btn-borde btn-chico" (click)="editarCita(cita)" [disabled]="actualizando()">
+                        Editar
+                      </button>
+                      <button type="button" class="btn btn-peligro btn-chico" (click)="eliminarCita(cita)">
+                        Eliminar
+                      </button>
+                    }
+                  </td>
+                }
               </tr>
-
             }
-
           </tbody>
-
         </table>
-
       </div>
-
     }
-
-  </section>
+  </article>
 
 </section>

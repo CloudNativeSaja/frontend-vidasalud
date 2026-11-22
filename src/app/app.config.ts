@@ -1,5 +1,8 @@
+import { registerLocaleData } from '@angular/common';
+import localeEsCl from '@angular/common/locales/es-CL';
 import {
   ApplicationConfig,
+  LOCALE_ID,
   inject,
   provideAppInitializer,
   provideBrowserGlobalErrorListeners
@@ -34,14 +37,9 @@ import {
 
 import { routes } from './app.routes';
 import { environment } from '../environments/environment';
+import { VIDA_SALUD_API_SCOPE } from './auth/api-scope';
 
-
-// ==========================================
-// VIDA SALUD API
-// ==========================================
-
-const VIDA_SALUD_API_SCOPE =
-  'api://964063ab-9c14-41ca-9ecb-9b6d3891e750/access_as_user';
+registerLocaleData(localeEsCl);
 
 
 // ==========================================
@@ -145,6 +143,8 @@ export const appConfig: ApplicationConfig = {
   providers: [
 
     provideBrowserGlobalErrorListeners(),
+
+    { provide: LOCALE_ID, useValue: 'es-CL' },
 
     provideRouter(routes),
 

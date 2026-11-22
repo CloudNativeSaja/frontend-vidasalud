@@ -1,4 +1,9 @@
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
+
+import { proveerSesion } from '../../testing/sesion-de-prueba';
 import { Dashboard } from './dashboard';
 
 describe('Dashboard', () => {
@@ -8,6 +13,12 @@ describe('Dashboard', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [Dashboard],
+      providers: [
+        provideRouter([]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        ...proveerSesion(['ADMIN'])
+      ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(Dashboard);

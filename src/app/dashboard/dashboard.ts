@@ -1,45 +1,17 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { Component, inject } from '@angular/core';
 
-interface UserProfile {
-  displayName: string;
-  userPrincipalName: string;
-  mail: string | null;
-}
+import { RolesService } from '../auth/roles.service';
+import { DashboardAdmin } from './admin/dashboard-admin';
+import { DashboardPaciente } from './paciente/dashboard-paciente';
+import { DashboardRecepcion } from './recepcion/dashboard-recepcion';
 
+/** Elige el panel según el rol principal de la sesión. */
 @Component({
-  imports: [],
+  imports: [DashboardAdmin, DashboardRecepcion, DashboardPaciente],
   selector: 'app-dashboard',
   styleUrl: './dashboard.css',
   templateUrl: './dashboard.html',
 })
-export class Dashboard implements OnInit {
-
-  private http = inject(HttpClient);
-
-  profile = signal<UserProfile | null>(null);
-  errorMessage = signal('');
-
-  ngOnInit(): void {
-    this.loadProfile();
-  }
-
-  private loadProfile(): void {
-
-    this.http
-      .get<UserProfile>('https://graph.microsoft.com/v1.0/me')
-      .subscribe({
-        next: (profile) => {
-          this.profile.set(profile);
-        },
-
-        error: (error) => {
-          console.error('Error al obtener perfil:', error);
-
-          this.errorMessage.set(
-            'No fue posible obtener los datos del usuario.'
-          );
-        }
-      });
-  }
+export class Dashboard {
+  protected readonly sesion = inject(RolesService);
 }

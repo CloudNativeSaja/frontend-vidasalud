@@ -1,160 +1,104 @@
-<div class="estructura-app">
+@if (!sesion.autenticado()) {
 
-  <header class="barra-superior">
+  <!-- Sin sesión: pantalla de ingreso a pantalla completa -->
+  <router-outlet />
 
-    <a
-      class="marca"
-      routerLink="/"
-    >
-      <div class="icono-marca">
-        +
-      </div>
+} @else if (sesion.roles().length === 0) {
 
-      <div>
-        <h1>VidaSalud</h1>
-        <span>Gestión de atenciones</span>
-      </div>
-    </a>
+  <!-- Sesión iniciada pero sin rol asignado en Entra ID -->
+  <main class="sin-rol">
+    <section class="tarjeta sin-rol-tarjeta">
+      <app-logo [tamano]="44" />
 
-    @if (isLoggedIn) {
+      <span class="antetitulo">Acceso pendiente</span>
 
-      <div class="acciones-usuario">
+      <h1 class="titulo">Aún no tienes un <em>rol</em> asignado.</h1>
 
-        <div class="info-usuario">
-          <span>Sesión iniciada</span>
-          <strong>{{ userName }}</strong>
-        </div>
+      <p class="texto-2">
+        Iniciaste sesión como <strong>{{ sesion.nombre() }}</strong>, pero tu
+        cuenta no tiene permisos en VidaSalud. Pide acceso al administrador
+        para que te asigne un rol (Administración, Recepción, Paciente o
+        Auditoría) y vuelve a ingresar.
+      </p>
 
-        <button
-          class="boton-cerrar-sesion"
-          (click)="logout()"
-        >
-          Cerrar sesión
-        </button>
-
-      </div>
-
-    }
-
-  </header>
-
-      @if (isLoggedIn) {
-
-      <nav class="navegacion-principal">
-
-        <a
-          routerLink="/dashboard"
-          routerLinkActive="activo"
-        >
-          Dashboard
-        </a>
-
-        <a
-          routerLink="/citas"
-          routerLinkActive="activo"
-        >
-          Citas
-        </a>
-
-        <a
-          routerLink="/catalogo"
-          routerLinkActive="activo"
-        >
-          Catálogo
-        </a>
-
-        <a
-          routerLink="/reportes"
-          routerLinkActive="activo"
-        >
-          Reportes
-        </a>
-
-        <a
-          routerLink="/auditoria"
-          routerLinkActive="activo"
-        >
-          Auditoría
-        </a>
-
-      </nav>
-
-    }
-
-  <main class="contenido-principal">
-
-    @if (!isLoggedIn) {
-
-      <section class="seccion-login">
-
-        <div class="tarjeta-login">
-
-          <div class="icono-medico">
-            +
-          </div>
-
-          <span class="etiqueta-superior">
-            Plataforma VidaSalud
-          </span>
-
-          <h2>
-            Bienvenido
-          </h2>
-
-          <p>
-            Accede de forma segura para gestionar
-            las atenciones de VidaSalud.
-          </p>
-
-          <button
-            class="boton-principal"
-            (click)="login()"
-          >
-            Iniciar sesión con Microsoft
-          </button>
-
-          <span class="mensaje-seguridad">
-            Acceso protegido con Microsoft Entra ID
-          </span>
-
-        </div>
-
-      </section>
-
-      } @else if (estaEnInicio()) {
-
-        <section class="seccion-bienvenida">
-
-        <div>
-
-          <span class="etiqueta-superior">
-            Panel principal
-          </span>
-
-          <h2>
-            Hola, {{ userName }}
-          </h2>
-
-          <p>
-            Bienvenido a la plataforma de gestión
-            de atenciones VidaSalud.
-          </p>
-
-        </div>
-
-        <a
-          class="enlace-principal"
-          routerLink="/dashboard"
-        >
-          Ir al Dashboard
-        </a>
-
-      </section>
-
-    }
-
-    <router-outlet></router-outlet>
-
+      <button type="button" class="btn btn-borde" (click)="logout()">
+        <app-icono nombre="salir" />
+        Cerrar sesión
+      </button>
+    </section>
   </main>
 
-</div>
+} @else if (sesion.esSoloPaciente()) {
+
+  <!-- Paciente: barra superior simple -->
+  <div class="estructura-paciente">
+    <header class="barra-superior">
+      <a routerLink="/dashboard" class="marca" aria-label="Ir al inicio">
+        <app-logo [tamano]="32" />
+      </a>
+
+      <nav class="nav-superior" aria-label="Navegación principal">
+        <a routerLink="/dashboard" routerLinkActive="activo">Mis atenciones</a>
+        <a routerLink="/citas" routerLinkActive="activo">Mis citas</a>
+      </nav>
+
+      <div class="usuario-superior">
+        <span class="avatar" aria-hidden="true">{{ sesion.iniciales() }}</span>
+        <span class="usuario-nombre">{{ sesion.primerNombre() }}</span>
+        <button
+          type="button"
+          class="btn-icono"
+          (click)="logout()"
+          aria-label="Cerrar sesión"
+          title="Cerrar sesión">
+          <app-icono nombre="salir" />
+        </button>
+      </div>
+    </header>
+
+    <main class="contenido">
+      <router-outlet />
+    </main>
+  </div>
+
+} @else {
+
+  <!-- Roles de gestión: barra lateral -->
+  <div class="estructura">
+    <aside class="barra-lateral">
+      <a routerLink="/dashboard" class="marca" aria-label="Ir al panel">
+        <app-logo [tamano]="34" tono="claro" />
+      </a>
+
+      <nav class="nav-lateral" aria-label="Navegación principal">
+        @for (item of menu(); track item.ruta) {
+          <a [routerLink]="item.ruta" routerLinkActive="activo">
+            <app-icono [nombre]="item.icono" />
+            <span>{{ item.etiqueta }}</span>
+          </a>
+        }
+      </nav>
+
+      <div class="tarjeta-usuario">
+        <span class="avatar" aria-hidden="true">{{ sesion.iniciales() }}</span>
+        <div class="usuario-datos">
+          <strong>{{ sesion.nombre() }}</strong>
+          <span>{{ sesion.nombreRol() }}</span>
+        </div>
+        <button
+          type="button"
+          class="btn-icono"
+          (click)="logout()"
+          aria-label="Cerrar sesión"
+          title="Cerrar sesión">
+          <app-icono nombre="salir" />
+        </button>
+      </div>
+    </aside>
+
+    <main class="contenido">
+      <router-outlet />
+    </main>
+  </div>
+
+}
