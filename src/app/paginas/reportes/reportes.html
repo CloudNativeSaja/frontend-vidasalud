@@ -5,7 +5,8 @@
       <span class="antetitulo">Información y resultados</span>
       <h1 class="titulo">Reportes de <em>operación</em></h1>
       <p>
-        Indicadores calculados con las citas y el catálogo vigentes.
+        Indicadores de ms-vidasalud-report, alimentados por los eventos de
+        citas publicados en Kafka y consultados a través del BFF.
         @if (actualizado(); as fecha) {
           Actualizado a las <span class="mono">{{ fecha | date: 'HH:mm' }}</span>.
         }
@@ -19,6 +20,21 @@
   </header>
 
   @if (resumen(); as r) {
+    @if (r.origen === 'kafka') {
+      <p class="aviso aviso-info">
+        Fuente: eventos Kafka (vidasalud.appointments.events). KPIs de las últimas 24 h
+        y prestaciones de los últimos 7 días.
+        @if (r.ultimoEvento) {
+          Último evento procesado: <span class="mono">{{ r.ultimoEvento | date: 'dd/MM HH:mm:ss' }}</span>.
+        }
+      </p>
+    } @else {
+      <p class="aviso aviso-info">
+        El servicio de reportes (/api/bff/report) no respondió. Se muestran
+        indicadores calculados con las citas y el catálogo actuales.
+      </p>
+    }
+
     <article class="tarjeta">
       <app-kpis-operacion [resumen]="r" />
     </article>

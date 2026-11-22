@@ -11,7 +11,9 @@ import { ResumenOperacion } from '../services/report.service';
     <div class="kpis">
       <div class="kpi">
         <span class="kpi-valor">{{ resumen().atenciones | number }}</span>
-        <span class="kpi-etiqueta">Atenciones registradas</span>
+        <span class="kpi-etiqueta">
+          {{ resumen().origen === 'kafka' ? 'Atenciones, últimas 24 h' : 'Atenciones registradas' }}
+        </span>
       </div>
 
       <div class="kpi">
@@ -25,11 +27,13 @@ import { ResumenOperacion } from '../services/report.service';
 
       <div class="kpi">
         <span class="kpi-valor">
-          @if (resumen().esperaPromedioDias !== null) {
-            {{ resumen().esperaPromedioDias | number: '1.0-1' }}<small>días</small>
+          @if (resumen().esperaPromedio !== null) {
+            {{ resumen().esperaPromedio | number: '1.0-1' }}<small>{{ resumen().esperaUnidad }}</small>
           } @else { — }
         </span>
-        <span class="kpi-etiqueta">Espera promedio, de la solicitud a la cita</span>
+        <span class="kpi-etiqueta">
+          {{ resumen().origen === 'kafka' ? 'Espera promedio' : 'Espera promedio, de la solicitud a la cita' }}
+        </span>
       </div>
 
       <div class="kpi">
