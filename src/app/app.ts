@@ -108,9 +108,11 @@ export class App implements OnInit {
         }
 
         this.sesion.sincronizar();
+        void this.sesion.cargarRolesDelApi();
       });
 
     this.sesion.sincronizar();
+    void this.sesion.cargarRolesDelApi();
   }
 
   logout(): void {

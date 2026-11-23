@@ -1,6 +1,9 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { MsalService } from '@azure/msal-angular';
 import { AccountInfo } from '@azure/msal-browser';
+import { firstValueFrom } from 'rxjs';
+
+import { VIDA_SALUD_API_SCOPE } from './api-scope';
 
 /**
  * Roles de la aplicación en Microsoft Entra ID.
@@ -23,9 +26,36 @@ export const NOMBRE_ROL: Record<Rol, string> = {
   PACIENTE: 'Paciente'
 };
 
+/** Extrae el claim `roles` del payload de un JWT (sin validar la firma). */
+export function rolesDesdeToken(token: string | undefined): string[] {
+  if (!token) {
+    return [];
+  }
+
+  try {
+    const payload = token.split('.')[1];
+    const base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
+    const json = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map(c => '%' + c.charCodeAt(0).toString(16).padStart(2, '0'))
+        .join('')
+    );
+    const roles = JSON.parse(json).roles;
+
+    return Array.isArray(roles) ? roles : [];
+  } catch {
+    return [];
+  }
+}
+
 /**
- * Expone la cuenta MSAL activa y los roles que vienen
- * en el claim `roles` del ID token.
+ * Expone la cuenta MSAL activa y sus roles.
+ *
+ * Los roles se asignan en la app VidaSalud-API, por eso viajan en el
+ * access token de la API (el mismo que valida el BFF). El ID token solo
+ * los trae si también están definidos en VidaSalud-Frontend, así que se
+ * combinan ambas fuentes.
  */
 @Injectable({ providedIn: 'root' })
 export class RolesService {
@@ -34,10 +64,18 @@ export class RolesService {
 
   private readonly cuenta = signal<AccountInfo | null>(null);
 
+  /** Roles leídos del access token de la API (se cargan de forma asíncrona). */
+  private readonly rolesDelApi = signal<string[]>([]);
+  private cuentaDelApi?: string;
+  private cargaDelApi?: Promise<void>;
+
   readonly autenticado = computed(() => this.cuenta() !== null);
 
   readonly roles = computed<Rol[]>(() => {
-    const declarados = this.cuenta()?.idTokenClaims?.roles ?? [];
+    const declarados = [
+      ...(this.cuenta()?.idTokenClaims?.roles ?? []),
+      ...this.rolesDelApi()
+    ];
     return ROLES.filter(rol => declarados.includes(rol));
   });
 
@@ -100,6 +138,48 @@ export class RolesService {
     }
 
     this.cuenta.set(activa);
+  }
+
+  /**
+   * Carga los roles del access token de la API. Se hace una vez por
+   * cuenta; si falla, se conservan los roles del ID token y se puede
+   * reintentar en la siguiente navegación.
+   */
+  cargarRolesDelApi(): Promise<void> {
+    this.sincronizar();
+
+    const cuenta = this.cuenta();
+
+    if (!cuenta) {
+      this.rolesDelApi.set([]);
+      this.cuentaDelApi = undefined;
+      this.cargaDelApi = undefined;
+      return Promise.resolve();
+    }
+
+    if (this.cargaDelApi && this.cuentaDelApi === cuenta.homeAccountId) {
+      return this.cargaDelApi;
+    }
+
+    this.cuentaDelApi = cuenta.homeAccountId;
+    this.cargaDelApi = this.leerRolesDelApi(cuenta);
+    return this.cargaDelApi;
+  }
+
+  private async leerRolesDelApi(cuenta: AccountInfo): Promise<void> {
+    try {
+      const resultado = await firstValueFrom(
+        this.msal.acquireTokenSilent({
+          scopes: [VIDA_SALUD_API_SCOPE],
+          account: cuenta
+        })
+      );
+
+      this.rolesDelApi.set(rolesDesdeToken(resultado.accessToken));
+    } catch {
+      this.rolesDelApi.set([]);
+      this.cargaDelApi = undefined;
+    }
   }
 
   tiene(rol: Rol): boolean {

@@ -8,11 +8,12 @@ import { Rol, RolesService } from './roles.service';
  * roles indicados en `data.roles` de la ruta.
  * Se usa después de MsalGuard: `canActivate: [MsalGuard, roleGuard]`.
  */
-export const roleGuard: CanActivateFn = route => {
+export const roleGuard: CanActivateFn = async route => {
   const sesion = inject(RolesService);
   const router = inject(Router);
 
-  sesion.sincronizar();
+  // Los roles asignados en la API viajan en el access token.
+  await sesion.cargarRolesDelApi();
 
   const permitidos = (route.data['roles'] ?? []) as Rol[];
 
