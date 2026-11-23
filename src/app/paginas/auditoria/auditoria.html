@@ -23,6 +23,13 @@
         {{ f.etiqueta }}
       </button>
     }
+    <button
+      type="button"
+      class="chip"
+      [disabled]="cargando()"
+      (click)="cargar()">
+      {{ cargando() ? 'Actualizando…' : 'Actualizar' }}
+    </button>
   </div>
 
   <div class="rejilla">
@@ -52,16 +59,27 @@
             </li>
           }
         </ol>
+      } @else if (error()) {
+        <div class="vacio">
+          <span class="vacio-icono"><app-icono nombre="escudo" [tamano]="22" /></span>
+          <h3>No se pudo cargar la <em>auditoría</em></h3>
+          <p>{{ error() }}</p>
+          <button type="button" class="chip" (click)="cargar()">Reintentar</button>
+        </div>
+      } @else if (cargando()) {
+        <div class="vacio">
+          <span class="vacio-icono"><app-icono nombre="escudo" [tamano]="22" /></span>
+          <h3>Cargando <em>eventos</em></h3>
+          <p>Consultando la línea de tiempo.</p>
+        </div>
       } @else {
         <div class="vacio">
           <span class="vacio-icono"><app-icono nombre="escudo" [tamano]="22" /></span>
           <h3>Sin eventos para <em>mostrar</em></h3>
           <p>
-            Esta vista aún no está conectada: el backend no expone un
-            endpoint de auditoría. Cuando exista, los eventos de citas,
-            catálogo, mensajería y acceso aparecerán aquí.
+            Todavía no hay eventos de auditoría. Aparecen aquí cuando se crea
+            una cita o cambia su estado: llegan desde Kafka.
           </p>
-          <span class="solo-lectura">Pendiente de integración</span>
         </div>
       }
     </article>
